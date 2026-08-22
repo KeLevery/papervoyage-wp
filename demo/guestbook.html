@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>街坊·留言 · 纸旅 PaperVoyage</title>
+<link rel="stylesheet" href="theme.css">
+<script>(function(){try{var t=localStorage.getItem('papervoyage-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body data-page="guestbook">
+
+<div class="topbar"><div class="wrap">
+  <span class="brandmark">PAPERVOYAGE</span>
+  <ul class="menu">
+    <li><a href="articles.html">開往</a></li>
+    <li><a href="about.html">關於我</a></li>
+    <li><a href="guestbook.html" style="color:#e8e8e8">街坊·留言</a></li>
+    <li><a href="archive.html">歸檔</a></li>
+  </ul>
+  <span class="mono-date" id="topbar-clock"></span>
+</div></div>
+
+<header class="site-header"><div class="wrap">
+  <div class="site-branding">
+    <p class="site-title"><a href="index.html">纸旅<span class="dot">.</span></a></p>
+    <div class="site-desc">The Beginning of Everything</div>
+  </div>
+  <nav class="main-navigation" id="site-navigation"><ul class="menu">
+    <li class="menu-item"><a href="index.html"><span>初頁</span><span class="en">First Page</span></a></li>
+    <li class="menu-item"><a href="category-albatross.html"><span>信天翁</span><span class="en">Albatross</span></a></li>
+    <li class="menu-item"><a href="category-travels.html"><span>遊記</span><span class="en">Travels</span></a></li>
+    <li class="menu-item"><a href="category-films.html"><span>影視</span><span class="en">Films</span></a></li>
+    <li class="menu-item"><a href="category-essays.html"><span>雜文</span><span class="en">Essays</span></a></li>
+    <li class="menu-item"><a href="category-dreams.html"><span>夢境</span><span class="en">Dreams</span></a></li>
+  </ul></nav>
+  <div class="header-actions">
+    <button class="icon-btn" id="search-toggle" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+    <button class="icon-btn" id="theme-toggle" aria-label="切换明暗"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="菜单"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</div></header>
+<div class="nav-mask" id="nav-mask"></div>
+
+<div class="search-overlay" id="search-overlay">
+  <button class="icon-btn search-close" id="search-close">✕</button>
+  <div class="search-inner">
+    <span class="en-sub">Search the Archive</span>
+    <form action="articles.html" method="get" autocomplete="off"><input type="search" name="q" placeholder="搜索文章…"></form>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <header class="page-head reveal">
+      <span class="en-sub">Neighborhood Voices · 街坊留言</span>
+      <h1>街坊·留言</h1>
+      <p class="desc">这是我的线上客厅。来过的人都可以留下一句话——一句吐槽、一句推荐、一句你想说但没人听的话。所有留言保存在你自己的浏览器里（localStorage），关闭页面不会丢。</p>
+    </header>
+
+    <div class="content-with-sidebar">
+      <div class="guestbook-wrap">
+        <section class="widget" style="padding:28px;margin-bottom:24px">
+          <h3 class="widget-title">留下你的声音 <span class="en-sub" style="margin-left:8px">Leave a Note</span></h3>
+          <form class="comment-form" id="gb-form" style="margin-top:14px">
+            <div class="row">
+              <div><label>昵称 *</label><input type="text" name="author" required></div>
+              <div><label>邮箱 *（不公开）</label><input type="email" name="email" required></div>
+              <div><label>站点（可选）</label><input type="text" name="site"></div>
+            </div>
+            <div>
+              <label>留言 *</label>
+              <textarea name="content" rows="4" placeholder="说点真实的——别客气，也别讨好。可以是一句话、一个链接、一个未完成的句子。" required></textarea>
+            </div>
+            <p class="hint">所有留言保存在你的浏览器本地（localStorage）。不同浏览器/设备之间不会同步。</p>
+            <div><button class="submit" type="submit">发布留言</button></div>
+          </form>
+        </section>
+
+        <ol class="comment-list" id="gb-list"></ol>
+      </div>
+
+      <aside class="sidebar">
+        <section class="widget">
+          <h3 class="widget-title">关于这里</h3>
+          <p style="font-size:13px;line-height:1.9;color:var(--muted)">留言墙是我最初做博客时保留的功能。十多年过去，它变成了一个很私人的角落——有些人不读文章也会来这里留一句晚安。</p>
+        </section>
+        <section class="widget">
+          <h3 class="widget-title">去找 <span class="en-sub" style="margin-left:8px">Find me</span></h3>
+          <ul>
+            <li><a href="mailto:hello@papervoyage.cn">邮件</a><span class="n">hello@…</span></li>
+            <li><a href="https://weibo.com" target="_blank" rel="noopener">微博</a><span class="n">@纸旅</span></li>
+            <li><a href="#">RSS</a><span class="n">/feed/</span></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <span class="en-sub">PAPERVOYAGE · Paper × Minimal × Poetry</span>
+    <span>© 2026 纸旅 · <a href="index.html" style="color:var(--brand)">纸旅 PaperVoyage</a></span>
+  </div>
+</div></footer>
+
+<div class="float-tools" id="float-tools">
+  <button class="icon-btn" id="back-to-top" aria-label="回到顶部"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+</div>
+
+<script src="data.js"></script>
+<script src="theme.js"></script>
+<script>
+(function(){
+  var GB_KEY = 'pv_guestbook';
+  function get(){ try{ return JSON.parse(localStorage.getItem(GB_KEY) || '[]'); }catch(e){ return []; } }
+  function add(c){ var l = get(); l.unshift(c); try{ localStorage.setItem(GB_KEY, JSON.stringify(l)); }catch(e){} return l; }
+  function avatarChar(name){ return (name||'?').trim().charAt(0).toUpperCase() || '?'; }
+  function render(){
+    var list = get();
+    var el = document.getElementById('gb-list');
+    if(!list.length){
+      el.innerHTML = '<li style="padding:24px 0;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line-soft)">还没有留言。做第一个留下声音的人。</li>';
+      return;
+    }
+    el.innerHTML = list.map(function(c){
+      return '<li><article class="comment-body">'+
+        '<span class="comment-avatar">'+ (c.author||'?').trim().charAt(0).toUpperCase() +'</span>'+
+        '<div class="comment-main">'+
+          '<div class="comment-meta"><span class="comment-author">'+(c.author||'')+'</span>'+
+          '<a class="comment-date" href="#">'+c.date+'</a></div>'+
+          '<div class="comment-content">'+(c.content||'').replace(/\n/g,'<br>')+'</div>'+
+          '<div><a class="comment-reply" href="#">回复</a></div>'+
+        '</div></article></li>';
+    }).join('');
+  }
+  var f = document.getElementById('gb-form');
+  if(f){
+    f.addEventListener('submit', function(e){
+      e.preventDefault();
+      var author = f.author.value.trim();
+      var content = f.content.value.trim();
+      if(!author || !content) return;
+      var now = new Date();
+      var pad = function(n){return n<10?'0'+n:''+n;};
+      add({
+        author: author,
+        email: f.email.value.trim(),
+        site: f.site.value.trim(),
+        content: content,
+        date: now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes())
+      });
+      f.content.value = '';
+      render();
+      var list = document.getElementById('gb-list');
+      if(list) list.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>

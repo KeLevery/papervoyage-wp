@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遊記 · Notes on the Road · 纸旅 PaperVoyage</title>
+<link rel="stylesheet" href="theme.css">
+<script>(function(){try{var t=localStorage.getItem('papervoyage-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body class="cat-travels" data-cat="travels">
+
+<div class="topbar"><div class="wrap">
+  <span class="brandmark">PAPERVOYAGE</span>
+  <ul class="menu">
+    <li><a href="articles.html">開往</a></li>
+    <li><a href="about.html">關於我</a></li>
+    <li><a href="guestbook.html">街坊·留言</a></li>
+    <li><a href="archive.html">歸檔</a></li>
+  </ul>
+  <span class="mono-date" id="topbar-clock"></span>
+</div></div>
+
+<header class="site-header"><div class="wrap">
+  <div class="site-branding">
+    <p class="site-title"><a href="index.html">纸旅<span class="dot">.</span></a></p>
+    <div class="site-desc">The Beginning of Everything</div>
+  </div>
+  <nav class="main-navigation" id="site-navigation"><ul class="menu"><li class="menu-item"><a href="index.html"><span>初頁</span><span class="en">First Page</span></a></li><li class="menu-item"><a href="category-albatross.html"><span>信天翁</span><span class="en">Albatross</span></a></li><li class="menu-item"><a href="category-travels.html" class="active"><span>遊記</span><span class="en">Travels</span></a></li><li class="menu-item"><a href="category-films.html"><span>影視</span><span class="en">Films</span></a></li><li class="menu-item"><a href="category-essays.html"><span>雜文</span><span class="en">Essays</span></a></li><li class="menu-item"><a href="category-dreams.html"><span>夢境</span><span class="en">Dreams</span></a></li></ul></nav>
+  <div class="header-actions">
+    <button class="icon-btn" id="search-toggle" aria-label="搜索"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+    <button class="icon-btn" id="theme-toggle" aria-label="切换明暗"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    <button class="icon-btn menu-toggle" id="menu-toggle" aria-label="菜单"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</div></header>
+<div class="nav-mask" id="nav-mask"></div>
+
+<div class="search-overlay" id="search-overlay">
+  <button class="icon-btn search-close" id="search-close">✕</button>
+  <div class="search-inner">
+    <span class="en-sub">Search the Archive</span>
+    <form action="articles.html" method="get" autocomplete="off"><input type="search" name="q" placeholder="搜索文章…"></form>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <div class="cat-hero">
+        <div class="route-dashed" aria-hidden="true"></div>
+        <div class="cat-hero-inner">
+          <span class="en-sub">Notes on the Road</span>
+          <h1>遊記</h1>
+          <p>散步不是赶路，是把自己暂时交给一座城市，让它带你走。</p>
+        </div>
+      </div>
+    <div style="height:40px"></div>
+    <div class="content-with-sidebar">
+      <div id="list-flow"></div>
+      <aside class="sidebar">
+        <section class="widget">
+          <h3 class="widget-title">温度榜</h3>
+          <ol class="hot-list" id="sidebar-hot"></ol>
+        </section>
+        <section class="widget">
+          <h3 class="widget-title">其他栏目</h3>
+          <ul><li><a href="category-albatross.html">信天翁</a></li><li><a href="category-films.html">影視</a></li><li><a href="category-essays.html">雜文</a></li><li><a href="category-dreams.html">夢境</a></li></ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <span class="en-sub">PAPERVOYAGE · Paper × Minimal × Poetry</span>
+    <span>© 2026 纸旅 · <a href="index.html" style="color:var(--brand)">纸旅 PaperVoyage</a></span>
+  </div>
+</div></footer>
+
+<div class="float-tools" id="float-tools">
+  <button class="icon-btn" id="back-to-top" aria-label="回到顶部"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="theme.js"></script>
+<script>
+(function(){
+  var hot=document.getElementById('sidebar-hot');
+  if(hot){
+    var sorted=PV_ARTICLES.slice().sort(function(x,y){return y.temp-x.temp}).slice(0,5);
+    hot.innerHTML=sorted.map(function(a,i){return '<li><span class="rank">'+String(i+1).padStart(2,'0')+'</span><span class="t"><a href="article.html?slug='+a.slug+'">'+a.title+'</a></span><span class="temp-badge">'+a.temp+' °C</span></li>'}).join('');
+  }
+})();
+</script>
+</body>
+</html>
