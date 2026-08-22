@@ -4,7 +4,7 @@ Theme URI: https://example.com/papervoyage
 Author: kele
 Author URI: https://example.com
 Description: 纸面极简 × 手作温度 × 数字诗意 的个人出版型博客主题。灵感源自孤斗 GUDOU × D.DESIGN 设计系统：纸灰底色、豆沙红单点强调、中英双层排版、「温度 °C」热度隐喻、波浪分隔与取景框引文。支持自定义菜单、特色图片、小工具、明暗双主题。
-Version: 1.2.0
+Version: 1.4.0
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -1258,8 +1258,8 @@ input, textarea, select, button {
    Chrome 126+ / Edge / Safari 18.2+ 生效，其余浏览器正常跳转。
    ============================================================ */
 @view-transition { navigation: auto; }
-@keyframes vt-out { to { opacity: 0; transform: translateY(-1.2%); } }
-@keyframes vt-in { from { opacity: 0; transform: translateY(1.2%); } }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; } }
 ::view-transition-old(root) { animation: vt-out .32s ease both; }
 ::view-transition-new(root) { animation: vt-in .32s ease both; }
 @media (prefers-reduced-motion: reduce) {
@@ -1284,4 +1284,28 @@ input, textarea, select, button {
 #list-flow > article:nth-child(n+7), .post-flow > article:nth-child(n+7) { animation-delay: .58s; }
 @media (prefers-reduced-motion: reduce) {
   #list-flow > article, .post-flow > article { animation: none; }
+}
+
+
+/* ============================================================
+   20. 布局稳定性（CLS 优化）
+   ============================================================ */
+/* 始终保留滚动条槽位：长短页切换时滚动条不再出现/消失，消除整页横向跳动 */
+html { scrollbar-gutter: stable; background: var(--bg); }
+
+/* 登录态 WP 工具条存在时，吸顶头部随之下移，避免遮挡与错位 */
+body.admin-bar .site-header { top: 32px; }
+@media (max-width: 782px) {
+  body.admin-bar .site-header { top: 46px; }
+}
+
+/* ============================================================
+   21. PJAX 无感切换过渡：仅 main 轻微淡出/上浮进入，布局不动
+   ============================================================ */
+main { transition: opacity .16s ease, transform .16s ease; }
+main.pjax-exit { opacity: 0; transform: translateY(-6px); }
+main.pjax-enter { transition: none; opacity: 0; transform: translateY(10px); }
+@media (prefers-reduced-motion: reduce) {
+  main { transition: none; }
+  main.pjax-exit, main.pjax-enter { opacity: 1; transform: none; }
 }

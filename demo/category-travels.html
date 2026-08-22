@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>遊記 · Notes on the Road · 纸旅 PaperVoyage</title>
 <link rel="stylesheet" href="theme.css">
-<script>(function(){try{var t=localStorage.getItem('papervoyage-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script>(function(){var d=document.documentElement,b='#f1f1f1';try{var t=localStorage.getItem('papervoyage-theme');if(t){d.setAttribute('data-theme',t);if(t==='dark')b='#1b1d20';}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){d.setAttribute('data-theme','dark');b='#1b1d20';}}catch(e){}d.style.background=b;})();</script>
+<script type="speculationrules">{"prefetch":[{"source":"document","where":{"href_matches":"/*"},"eagerness":"conservative"}]}</script>
 </head>
 <body class="cat-travels" data-cat="travels">
 
@@ -83,6 +84,7 @@
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script src="theme.js"></script>
+<script src="pjax.js"></script>
 <script>
 (function(){
   var hot=document.getElementById('sidebar-hot');

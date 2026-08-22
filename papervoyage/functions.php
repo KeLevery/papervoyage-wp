@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PAPERVOYAGE_VERSION', '1.2.0' );
+define( 'PAPERVOYAGE_VERSION', '1.4.0' );
 define( 'PAPERVOYAGE_DIR', get_template_directory() );
 define( 'PAPERVOYAGE_URI', get_template_directory_uri() );
 
@@ -71,7 +71,7 @@ function papervoyage_assets() {
 	// Google Fonts：中文黑体 + 宋体（引文）
 	wp_enqueue_style(
 		'papervoyage-fonts',
-		'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&display=swap',
+		'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&display=optional',
 		array(),
 		null
 	);
@@ -83,16 +83,72 @@ function papervoyage_assets() {
 		'papervoyage-main',
 		'papervoyageData',
 		array(
-			'searchHint' => __( '输入关键词，回车开始搜索…', 'papervoyage' ),
-			'copied'     => __( '链接已复制', 'papervoyage' ),
+			'searchHint'       => __( '输入关键词，回车开始搜索…', 'papervoyage' ),
+			'copied'           => __( '链接已复制', 'papervoyage' ),
+			'commentReplySrc'  => site_url( '/wp-includes/js/comment-reply.min.js' ),
 		)
 	);
+	wp_enqueue_script( 'papervoyage-pjax', PAPERVOYAGE_URI . '/assets/js/pjax.js', array( 'papervoyage-main' ), PAPERVOYAGE_VERSION, true );
 
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'papervoyage_assets' );
+
+/**
+ * 资源提示：字体域名 preconnect，缩短字体首用等待
+ */
+function papervoyage_resource_hints( $urls, $relation_type ) {
+	if ( 'preconnect' === $relation_type ) {
+		$urls[] = array(
+			'href'        => 'https://fonts.gstatic.com',
+			'crossorigin' => 'anonymous',
+		);
+		$urls[] = 'https://fonts.googleapis.com';
+	}
+	return $urls;
+}
+add_filter( 'wp_resource_hints', 'papervoyage_resource_hints', 10, 2 );
+
+/**
+ * 布局稳定性（CLS）：移除前台 emoji 检测脚本。
+ * twemoji 会把正文里的 emoji 文字异步替换为图片，造成加载后布局偏移。
+ */
+function papervoyage_disable_emoji_scripts() {
+	if ( is_admin() ) {
+		return;
+	}
+	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	remove_action( 'wp_print_styles', 'print_emoji_styles' );
+	remove_filter( 'the_content_feed', 'wp_staticize_emoji' );
+	remove_filter( 'comment_text_rss', 'wp_staticize_emoji' );
+}
+add_action( 'init', 'papervoyage_disable_emoji_scripts' );
+
+/**
+ * 首屏 Hero 图预加载，避免大图晚到造成首屏视觉闪变
+ */
+function papervoyage_preload_assets() {
+	$hero = get_theme_mod( 'hero_image' );
+	if ( $hero && is_front_page() ) {
+		echo '<link rel="preload" as="image" href="' . esc_url( $hero ) . '">' . "\n";
+	}
+}
+add_action( 'wp_head', 'papervoyage_preload_assets', 2 );
+
+/**
+ * Speculation Rules：悬停时预取站内链接的 HTML（Chrome 支持，其余浏览器忽略）。
+ * 点击时页面几乎即时渲染，消除多页应用跳转时的空白窗口。
+ * 只用 prefetch 不用 prerender：避免页面在后台提前渲染、进场动画被吞掉。
+ */
+function papervoyage_speculation_rules() {
+	if ( is_admin() ) {
+		return;
+	}
+	echo '<script type="speculationrules">{"prefetch":[{"source":"document","where":{"href_matches":"/*"},"eagerness":"conservative"}]}</script>' . "\n";
+}
+add_action( 'wp_head', 'papervoyage_speculation_rules', 2 );
 
 /**
  * 小工具区域

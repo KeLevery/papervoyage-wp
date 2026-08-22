@@ -366,6 +366,8 @@
     renderArchive();
     renderCategoryPage();
   }
+  /* 暴露给 PJAX：内容替换后重跑渲染 */
+  window.PVRender = init;
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

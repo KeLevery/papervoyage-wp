@@ -469,8 +469,8 @@ button,input,textarea,select{font:inherit;color:inherit}
 /* ========== 页面过渡：原生跨文档 View Transitions（Chrome 126+/Safari 18.2+）
    导航时旧页快照与新页交叉过渡，全程无空白；不支持的浏览器正常跳转 ========== */
 @view-transition{navigation:auto}
-@keyframes vt-out{to{opacity:0;transform:translateY(-1.2%)}}
-@keyframes vt-in{from{opacity:0;transform:translateY(1.2%)}}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0}}
 ::view-transition-old(root){animation:vt-out .32s ease both}
 ::view-transition-new(root){animation:vt-in .32s ease both}
 @media (prefers-reduced-motion: reduce){
@@ -488,4 +488,16 @@ button,input,textarea,select{font:inherit;color:inherit}
 #list-flow>article:nth-child(n+7),.post-flow>article:nth-child(n+7){animation-delay:.58s}
 @media (prefers-reduced-motion: reduce){
   #list-flow>article,.post-flow>article{animation:none}
+}
+
+/* ========== 布局稳定性（CLS）：滚动条槽位稳定，消除长短页切换横向跳动 ========== */
+html{scrollbar-gutter:stable;background:var(--bg)}
+
+/* ========== PJAX 无感切换过渡：仅 main 轻微淡出/上浮进入，布局不动 ========== */
+main{transition:opacity .16s ease,transform .16s ease}
+main.pjax-exit{opacity:0;transform:translateY(-6px)}
+main.pjax-enter{transition:none;opacity:0;transform:translateY(10px)}
+@media (prefers-reduced-motion: reduce){
+  main{transition:none}
+  main.pjax-exit,main.pjax-enter{opacity:1;transform:none}
 }

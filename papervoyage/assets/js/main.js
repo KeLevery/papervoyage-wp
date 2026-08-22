@@ -73,21 +73,22 @@
 		});
 	}
 
-	/* ---------- 滚动进场 ---------- */
-	var revealEls = $$('.reveal');
-	if ('IntersectionObserver' in window && revealEls.length) {
-		var io = new IntersectionObserver(function (entries) {
-			entries.forEach(function (entry) {
-				if (entry.isIntersecting) {
-					entry.target.classList.add('is-in');
-					io.unobserve(entry.target);
-				}
-			});
-		}, { threshold: 0.08, rootMargin: '0px 0px 400px 0px' });
-		revealEls.forEach(function (el) { io.observe(el); });
-	} else {
-		revealEls.forEach(function (el) { el.classList.add('is-in'); });
+	/* ---------- 滚动进场（可重复调用：PJAX 替换内容后重新观察） ---------- */
+	var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+		entries.forEach(function (entry) {
+			if (entry.isIntersecting) {
+				entry.target.classList.add('is-in');
+				io.unobserve(entry.target);
+			}
+		});
+	}, { threshold: 0.08, rootMargin: '0px 0px 400px 0px' }) : null;
+	function observeReveals() {
+		$$('.reveal:not(.is-in)').forEach(function (el) {
+			if (io) { io.observe(el); } else { el.classList.add('is-in'); }
+		});
 	}
+	observeReveals();
+	window.papervoyageReveal = observeReveals;
 	/* 兜底：1.2s 后强制显示所有未入场元素，避免 IO 异常或无 JS 时内容不可见 */
 	setTimeout(function () {
 		$$('.reveal:not(.is-in)').forEach(function (el) { el.classList.add('is-in'); });
@@ -105,29 +106,29 @@
 		});
 	}
 
-	/* ---------- 复制链接分享 ---------- */
-	$$('[data-copy]').forEach(function (btn) {
-		btn.addEventListener('click', function (e) {
-			e.preventDefault();
-			var url = btn.getAttribute('data-copy');
-			var done = function () {
-				var hint = (window.papervoyageData && papervoyageData.copied) || '链接已复制';
-				var old = btn.textContent;
-				btn.textContent = hint;
-				setTimeout(function () { btn.textContent = old; }, 1600);
-			};
-			if (navigator.clipboard && navigator.clipboard.writeText) {
-				navigator.clipboard.writeText(url).then(done).catch(done);
-			} else {
-				var ta = document.createElement('textarea');
-				ta.value = url;
-				document.body.appendChild(ta);
-				ta.select();
-				try { document.execCommand('copy'); } catch (err) {}
-				document.body.removeChild(ta);
-				done();
-			}
-		});
+	/* ---------- 复制链接分享（事件委托：PJAX 替换 main 后新按钮依然生效） ---------- */
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest ? e.target.closest('[data-copy]') : null;
+		if (!btn) return;
+		e.preventDefault();
+		var url = btn.getAttribute('data-copy');
+		var done = function () {
+			var hint = (window.papervoyageData && papervoyageData.copied) || '链接已复制';
+			var old = btn.textContent;
+			btn.textContent = hint;
+			setTimeout(function () { btn.textContent = old; }, 1600);
+		};
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(url).then(done).catch(done);
+		} else {
+			var ta = document.createElement('textarea');
+			ta.value = url;
+			document.body.appendChild(ta);
+			ta.select();
+			try { document.execCommand('copy'); } catch (err) {}
+			document.body.removeChild(ta);
+			done();
+		}
 	});
 
 	/* ---------- 顶栏时钟 ---------- */
@@ -141,4 +142,10 @@
 		tick();
 		setInterval(tick, 1000);
 	}
+
+	/* ---------- 跳转前先回顶部：pageswap 在旧页快照捕获前触发 ----------
+	   提前 scrollTo 让新旧页面对齐滚动位置，交叉过渡不再整页上下跳动 */
+	window.addEventListener('pageswap', function (e) {
+		if (e.viewTransition && window.scrollY > 0) { window.scrollTo(0, 0); }
+	});
 })();

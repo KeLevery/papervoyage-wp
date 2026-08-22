@@ -15,7 +15,7 @@
 			? '/assets/img/card-essay.jpg'
 			: '/assets/img/card-film.jpg';
 		?>
-		<span class="thumb"><img src="<?php echo esc_url( get_template_directory_uri() . $fallback ); ?>" alt="<?php the_title_attribute(); ?>" loading="lazy"></span>
+		<span class="thumb"><img src="<?php echo esc_url( get_template_directory_uri() . $fallback ); ?>" alt="<?php the_title_attribute(); ?>" width="1216" height="765" loading="lazy"></span>
 	<?php endif; ?>
 	<span class="cap">
 		<?php

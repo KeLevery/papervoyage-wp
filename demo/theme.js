@@ -53,15 +53,15 @@
   window.addEventListener('scroll',function(){if(ft)ft.classList.toggle('is-show',window.scrollY>480)},{passive:true});
   if($('#back-to-top')) $('#back-to-top').addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
 
-  /* 复制链接 */
-  $$('[data-copy]').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-      e.preventDefault();
-      var url=btn.getAttribute('data-copy');
-      var done=function(){var old=btn.textContent;btn.textContent='链接已复制';setTimeout(function(){btn.textContent=old},1500)};
-      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done).catch(done)}
-      else{var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(err){}document.body.removeChild(ta);done()}
-    });
+  /* 复制链接（事件委托：PJAX 替换 main 后新按钮依然生效） */
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-copy]') : null;
+    if(!btn) return;
+    e.preventDefault();
+    var url=btn.getAttribute('data-copy');
+    var done=function(){var old=btn.textContent;btn.textContent='链接已复制';setTimeout(function(){btn.textContent=old},1500)};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done).catch(done)}
+    else{var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(err){}document.body.removeChild(ta);done()}
   });
 
   /* 顶栏时钟 */
@@ -71,4 +71,10 @@
     var tick=function(){var d=new Date();clock.textContent=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())};
     tick();setInterval(tick,1000);
   }
+
+  /* 跳转前先回顶部：pageswap 在旧页快照捕获前触发，
+     提前 scrollTo 让新旧页面对齐滚动位置，交叉过渡不再整页上下跳动 */
+  window.addEventListener('pageswap', function(e){
+    if (e.viewTransition && window.scrollY > 0) window.scrollTo(0, 0);
+  });
 })();
