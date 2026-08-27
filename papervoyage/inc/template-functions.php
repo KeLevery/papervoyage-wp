@@ -88,6 +88,34 @@ function papervoyage_reading_time( $post_id = null ) {
    主导航 Walker：中文名 + 英文副标题（菜单描述字段）
    ============================================================ */
 
+/* 常用栏目中文 → 英文副标题兜底映射（菜单项未填「描述」时使用） */
+function papervoyage_nav_en_fallback( $title ) {
+	$map = array(
+		'初页'     => 'First Page',
+		'初頁'     => 'First Page',
+		'首页'     => 'First Page',
+		'信天翁'   => 'Albatross',
+		'随笔'     => 'Essays',
+		'雜文'     => 'Essays',
+		'杂文'     => 'Notes',
+		'游记'     => 'Travels',
+		'遊記'     => 'Travels',
+		'影视'     => 'Films',
+		'影視'     => 'Films',
+		'梦境'     => 'Dreams',
+		'夢境'     => 'Dreams',
+		'归档'     => 'Archive',
+		'歸檔'     => 'Archive',
+		'关于'     => 'About',
+		'关于我'   => 'About',
+		'留言'     => 'Guestbook',
+		'留言板'   => 'Guestbook',
+		'街坊·留言' => 'Guestbook',
+	);
+	$key = trim( (string) $title );
+	return $map[ $key ] ?? '';
+}
+
 class PaperVoyage_Nav_Walker extends Walker_Nav_Menu {
 	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
 		$classes     = empty( $item->classes ) ? array() : (array) $item->classes;
@@ -105,7 +133,12 @@ class PaperVoyage_Nav_Walker extends Walker_Nav_Menu {
 		}
 
 		$title = apply_filters( 'the_title', $item->title, $item->ID );
-		$en    = ( 0 === $depth && ! empty( $item->description ) ) ? '<span class="en">' . esc_html( $item->description ) . '</span>' : '';
+		$en    = '';
+		if ( 0 === $depth ) {
+			/* 优先用菜单项「描述」字段；未填时用内置映射兜底 */
+			$en_text = ! empty( $item->description ) ? $item->description : papervoyage_nav_en_fallback( $title );
+			$en      = $en_text ? '<span class="en">' . esc_html( $en_text ) . '</span>' : '';
+		}
 
 		$item_output  = $args->before ?? '';
 		$item_output .= '<a' . $attributes . '><span class="zh">' . esc_html( $title ) . '</span>' . $en . '</a>';
@@ -284,12 +317,32 @@ function papervoyage_term_en_sub( $term = null ) {
 
 /**
  * 栏目 Hero 区——按 slug 输出完全不同的视觉
+ * 支持通过分类 meta 字段 cat_hero_image 设置自定义背景图
  */
 function papervoyage_category_hero( $slug, $cn, $en ) {
-	switch ( $slug ) {
+	// 拼音别名 → 栏目风格映射（兼容中文分类的拼音 slug）
+	$alias = array(
+		'suibi'  => 'albatross',
+		'youji'  => 'travels',
+		'yingshi' => 'films',
+		'zaowen'  => 'essays',
+		'zawen'   => 'essays',
+		'mengjing' => 'dreams',
+	);
+	$style_key = $alias[ $slug ] ?? $slug;
+
+	// 读取分类 Hero 图片；未上传时用主题自带默认大图，保证 Hero 视觉不缺席
+	$cat = get_queried_object();
+	$hero_img = $cat ? get_term_meta( $cat->term_id, 'cat_hero_image', true ) : '';
+	if ( ! $hero_img ) {
+		$hero_img = get_template_directory_uri() . '/assets/img/hero-default.jpg';
+	}
+	$hero_style = ' style="background-image:url(\'' . esc_url( $hero_img ) . '\')"';
+
+	switch ( $style_key ) {
 		case 'albatross':
 			?>
-			<div class="cat-hero">
+			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="wind-lines" aria-hidden="true"><svg viewBox="0 0 1200 340" preserveAspectRatio="none">
 					<path d="M0,80 Q300,40 600,90 T1200,70" fill="none" stroke="rgba(180,200,215,.25)" stroke-width="1"/>
 					<path d="M0,140 Q300,100 600,150 T1200,130" fill="none" stroke="rgba(180,200,215,.18)" stroke-width="1"/>
@@ -305,7 +358,7 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 			break;
 		case 'travels':
 			?>
-			<div class="cat-hero">
+			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="route-dashed" aria-hidden="true"></div>
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Notes on the Road' ); ?></span>
@@ -317,7 +370,7 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 			break;
 		case 'films':
 			?>
-			<div class="cat-hero">
+			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Films' ); ?> · 影視</span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
@@ -329,7 +382,7 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 			break;
 		case 'essays':
 			?>
-			<div class="cat-hero">
+			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Essays' ); ?> · 雜文</span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
@@ -340,7 +393,7 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 			break;
 		case 'dreams':
 			?>
-			<div class="cat-hero">
+			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="mist" aria-hidden="true">
 					<span style="top:20%;left:15%;animation-delay:0s"></span>
 					<span style="top:50%;left:40%;animation-delay:1.5s"></span>
@@ -358,10 +411,13 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 			break;
 		default:
 			?>
-			<header class="page-head">
-				<span class="en-sub"><?php echo esc_html( $en ? $en : 'Category' ); ?></span>
-				<h1><?php echo esc_html( $cn ); ?></h1>
-			</header>
+			<div class="cat-hero cat-hero-default"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+				<div class="cat-hero-inner">
+					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Category' ); ?></span>
+					<h1><?php echo esc_html( $cn ); ?></h1>
+					<p><?php echo esc_html( $cat && $cat->description ? $cat->description : '「' . $cn . '」栏目下的全部文章。' ); ?></p>
+				</div>
+			</div>
 			<?php
 	}
 }
@@ -378,6 +434,17 @@ function papervoyage_category_card( $slug ) {
 	$read = papervoyage_reading_time();
 	$words = papervoyage_word_count();
 	$thumb = has_post_thumbnail() ? get_the_post_thumbnail_url( null, 'papervoyage-card' ) : '';
+
+	// 拼音别名 → 栏目卡片风格映射
+	$alias = array(
+		'suibi'  => 'albatross',
+		'youji'  => 'travels',
+		'yingshi' => 'films',
+		'zaowen'  => 'essays',
+		'zawen'   => 'essays',
+		'mengjing' => 'dreams',
+	);
+	$slug = $alias[ $slug ] ?? $slug;
 
 	switch ( $slug ) {
 		case 'albatross':
@@ -465,7 +532,24 @@ function papervoyage_category_card( $slug ) {
 			<?php
 			break;
 		default:
-			get_template_part( 'template-parts/content', 'card' );
+			$d = explode( '-', get_the_date( 'Y-m-d' ) );
+			?>
+			<article class="log-card">
+				<a class="log-date" href="<?php echo esc_url( get_permalink() ); ?>">
+					<span class="day"><?php echo esc_html( $d[2] ); ?></span>
+					<span class="mon"><?php echo esc_html( $d[1] ); ?>月</span>
+				</a>
+				<div class="log-body">
+					<h3><a href="<?php echo esc_url( get_permalink() ); ?>"><?php echo esc_html( get_the_title() ); ?></a></h3>
+					<p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 30, '…' ) ); ?></p>
+					<div class="log-meta">
+						<?php papervoyage_temp_badge(); ?>
+						<span><?php echo esc_html( get_the_date( 'Y-m-d' ) ); ?></span>
+						<span><?php echo esc_html( papervoyage_reading_time() ); ?></span>
+					</div>
+				</div>
+			</article>
+			<?php
 	}
 }
 
@@ -477,6 +561,21 @@ function papervoyage_category_body_class( $classes ) {
 		$cat = get_queried_object();
 		if ( $cat && $cat->slug ) {
 			$classes[] = 'cat-' . $cat->slug;
+			// 拼音别名也映射到对应栏目风格类，让专属 CSS 生效（如 cat-suibi → cat-albatross）
+			$alias = array(
+				'suibi'    => 'albatross',
+				'youji'    => 'travels',
+				'yingshi'  => 'films',
+				'zaowen'   => 'essays',
+				'zawen'    => 'essays',
+				'mengjing' => 'dreams',
+			);
+			if ( isset( $alias[ $cat->slug ] ) ) {
+				$style_class = 'cat-' . $alias[ $cat->slug ];
+				if ( ! in_array( $style_class, $classes, true ) ) {
+					$classes[] = $style_class;
+				}
+			}
 		}
 	}
 	return $classes;

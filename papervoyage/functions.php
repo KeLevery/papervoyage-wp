@@ -208,3 +208,99 @@ add_filter( 'widget_tag_cloud_args', 'papervoyage_tag_cloud_args' );
  */
 require PAPERVOYAGE_DIR . '/inc/template-functions.php';
 require PAPERVOYAGE_DIR . '/inc/customizer.php';
+
+/* ============================================================
+   分类目录 Hero 图片上传框
+   ============================================================ */
+
+/**
+ * 添加分类页面 — Hero 图片上传框
+ */
+function papervoyage_category_hero_field_add() {
+	?>
+	<div class="form-field">
+		<label for="cat_hero_image"><?php esc_html_e( '栏目 Hero 图片', 'papervoyage' ); ?></label>
+		<input type="hidden" id="cat_hero_image" name="cat_hero_image" value="">
+		<div class="cat-hero-preview" style="margin-top:8px;max-width:400px;display:none">
+			<img src="" alt="" style="width:100%;border-radius:8px;border:1px solid #ddd">
+		</div>
+		<button type="button" class="button cat-hero-upload-btn" style="margin-top:8px"><?php esc_html_e( '选择图片', 'papervoyage' ); ?></button>
+		<button type="button" class="button cat-hero-remove-btn" style="margin-top:8px;display:none"><?php esc_html_e( '移除图片', 'papervoyage' ); ?></button>
+		<p class="description"><?php esc_html_e( '上传一张大图作为该栏目页的 Hero 背景图（建议 1600×600 以上）。', 'papervoyage' ); ?></p>
+	</div>
+	<?php
+}
+add_action( 'category_add_form_fields', 'papervoyage_category_hero_field_add' );
+
+/**
+ * 编辑分类页面 — Hero 图片上传框
+ */
+function papervoyage_category_hero_field_edit( $term ) {
+	$hero_url = get_term_meta( $term->term_id, 'cat_hero_image', true );
+	?>
+	<tr class="form-field">
+		<th scope="row"><label for="cat_hero_image"><?php esc_html_e( '栏目 Hero 图片', 'papervoyage' ); ?></label></th>
+		<td>
+			<input type="hidden" id="cat_hero_image" name="cat_hero_image" value="<?php echo esc_attr( $hero_url ); ?>">
+			<div class="cat-hero-preview" style="margin-top:8px;max-width:400px;<?php echo $hero_url ? '' : 'display:none'; ?>">
+				<img src="<?php echo esc_url( $hero_url ); ?>" alt="" style="width:100%;border-radius:8px;border:1px solid #ddd">
+			</div>
+			<button type="button" class="button cat-hero-upload-btn" style="margin-top:8px"><?php esc_html_e( '选择图片', 'papervoyage' ); ?></button>
+			<?php if ( $hero_url ) : ?>
+				<button type="button" class="button cat-hero-remove-btn" style="margin-top:8px"><?php esc_html_e( '移除图片', 'papervoyage' ); ?></button>
+			<?php endif; ?>
+			<p class="description"><?php esc_html_e( '上传一张大图作为该栏目页的 Hero 背景图（建议 1600×600 以上）。', 'papervoyage' ); ?></p>
+		</td>
+	</tr>
+	<?php
+}
+add_action( 'category_edit_form_fields', 'papervoyage_category_hero_field_edit' );
+
+/**
+ * 保存分类 Hero 图片
+ */
+function papervoyage_save_category_hero_image( $term_id ) {
+	if ( isset( $_POST['cat_hero_image'] ) ) {
+		$url = esc_url_raw( wp_unslash( $_POST['cat_hero_image'] ) );
+		update_term_meta( $term_id, 'cat_hero_image', $url );
+	}
+}
+add_action( 'created_category', 'papervoyage_save_category_hero_image' );
+add_action( 'edited_category', 'papervoyage_save_category_hero_image' );
+
+/**
+ * 分类编辑页 — 媒体上传器 JS
+ */
+function papervoyage_category_hero_uploader_js( $hook ) {
+	if ( 'edit-tags.php' !== $hook && 'term.php' !== $hook ) {
+		return;
+	}
+	wp_enqueue_media();
+	?>
+	<script>
+	jQuery(function($){
+		var frame;
+		$('.cat-hero-upload-btn').on('click', function(e){
+			e.preventDefault();
+			if(frame){ frame.open(); return; }
+			frame = wp.media({ title: '<?php echo esc_js( __( '选择 Hero 图片', 'papervoyage' ) ); ?>', library:{type:'image'}, multiple:false });
+			frame.on('select', function(){
+				var url = frame.state().get('selection').first().toJSON().url;
+				$('#cat_hero_image').val(url);
+				$('.cat-hero-preview img').attr('src', url);
+				$('.cat-hero-preview').show();
+				$('.cat-hero-remove-btn').show();
+			});
+			frame.open();
+		});
+		$('.cat-hero-remove-btn').on('click', function(e){
+			e.preventDefault();
+			$('#cat_hero_image').val('');
+			$('.cat-hero-preview').hide();
+			$(this).hide();
+		});
+	});
+	</script>
+	<?php
+}
+add_action( 'admin_enqueue_scripts', 'papervoyage_category_hero_uploader_js' );

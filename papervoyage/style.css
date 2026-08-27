@@ -4,7 +4,7 @@ Theme URI: https://example.com/papervoyage
 Author: kele
 Author URI: https://example.com
 Description: 纸面极简 × 手作温度 × 数字诗意 的个人出版型博客主题。灵感源自孤斗 GUDOU × D.DESIGN 设计系统：纸灰底色、豆沙红单点强调、中英双层排版、「温度 °C」热度隐喻、波浪分隔与取景框引文。支持自定义菜单、特色图片、小工具、明暗双主题。
-Version: 1.4.0
+Version: 1.4.2
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -306,11 +306,31 @@ input, textarea, select, button {
 }
 .main-navigation .menu-item > a:hover,
 .main-navigation .current-menu-item > a,
-.main-navigation .current_page_item > a { color: var(--brand); }
+.main-navigation .current-menu-parent > a,
+.main-navigation .current-menu-ancestor > a,
+.main-navigation .current-post-parent > a,
+.main-navigation .current-post-ancestor > a,
+.main-navigation .current_page_item > a,
+.main-navigation .current-page-parent > a,
+.main-navigation .current-category > a { color: var(--brand); }
 .main-navigation .menu-item > a:hover .en,
-.main-navigation .current-menu-item > a .en { color: var(--brand); }
+.main-navigation .current-menu-item > a .en,
+.main-navigation .current-menu-parent > a .en,
+.main-navigation .current-menu-ancestor > a .en,
+.main-navigation .current-post-parent > a .en,
+.main-navigation .current-post-ancestor > a .en,
+.main-navigation .current_page_item > a .en,
+.main-navigation .current-page-parent > a .en,
+.main-navigation .current-category > a .en { color: var(--brand); }
 .main-navigation .menu-item > a:hover::after,
-.main-navigation .current-menu-item > a::after { right: 0; }
+.main-navigation .current-menu-item > a::after,
+.main-navigation .current-menu-parent > a::after,
+.main-navigation .current-menu-ancestor > a::after,
+.main-navigation .current-post-parent > a::after,
+.main-navigation .current-post-ancestor > a::after,
+.main-navigation .current_page_item > a::after,
+.main-navigation .current-page-parent > a::after,
+.main-navigation .current-category > a::after { right: 0; }
 
 /* 子菜单 */
 .main-navigation .menu-item-has-children { position: relative; }
@@ -841,6 +861,8 @@ input, textarea, select, button {
   border-top: 1px solid var(--line);
 }
 .comments-title { display: flex; align-items: center; gap: 12px; font-size: 18px; }
+.comments-title .bar { width: 3px; height: 18px; background: var(--brand); border-radius: 2px; flex: none; }
+.no-comments { color: var(--muted); font-size: 13px; }
 .comment-list { list-style: none; margin: 24px 0; padding: 0; }
 .comment-list .children { list-style: none; margin: 0; padding-left: 52px; }
 .comment-body {
@@ -879,8 +901,20 @@ input, textarea, select, button {
 /* 评论表单 */
 .comment-respond { margin-top: 32px; }
 .comment-reply-title { display: flex; align-items: center; gap: 12px; font-size: 16px; }
-.comment-reply-title small { margin-left: auto; }
-.comment-form { display: grid; gap: 14px; }
+.comment-reply-title .en-sub { margin-left: 0; }
+.comment-reply-title small { margin-left: auto; font-size: 11px; font-weight: 400; letter-spacing: .1em; }
+.comment-reply-title small a { color: var(--muted); }
+.comment-reply-title small a:hover { color: var(--brand); }
+
+/* 三字段（昵称/邮箱/站点）排成一行，其余元素通栏 */
+.comment-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.comment-form > .comment-form-comment,
+.comment-form > .comment-notes,
+.comment-form > .comment-form-logged-in,
+.comment-form > .form-submit,
+.comment-form > .comment-form-cookies-consent,
+.comment-form > .comment-form-user-id { grid-column: 1 / -1; }
+
 .comment-form-comment textarea,
 .comment-form input[type="text"],
 .comment-form input[type="email"],
@@ -891,24 +925,46 @@ input, textarea, select, button {
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
   transition: border-color var(--t-base);
 }
 .comment-form textarea:focus, .comment-form input:focus { border-color: var(--brand); }
+.comment-form textarea { resize: vertical; min-height: 120px; }
+.comment-form ::placeholder { color: var(--muted); opacity: .6; }
 .comment-form label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.required-mark { color: var(--brand); font-weight: 600; }
 .comment-form-author, .comment-form-email, .comment-form-url { margin: 0; }
-.form-submit { margin: 0; }
+.comment-notes { font-size: 12px; color: var(--muted); margin: 0; }
+.comment-form-logged-in {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+}
+.comment-form-logged-in a { color: var(--ink); font-weight: 500; border-bottom: 1px solid var(--line); }
+.comment-form-logged-in a:hover { color: var(--brand); border-bottom-color: var(--brand); }
+.form-submit { margin: 4px 0 0; }
 .submit {
   background: var(--brand);
   color: #fff;
   border: none;
-  border-radius: var(--r-md);
-  padding: 10px 28px;
+  border-radius: var(--r-pill);
+  padding: 12px 34px;
   font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .06em;
   cursor: pointer;
-  transition: background var(--t-fast);
+  transition: background var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
 }
-.submit:hover { background: var(--brand-hover); }
-.comment-form-cookies-consent { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.submit:hover { background: var(--brand-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0, 0, 0, .12); }
+.submit:active { transform: none; box-shadow: none; }
+.comment-form-cookies-consent { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; margin: 0; }
+.comment-form-cookies-consent label { display: inline; margin: 0; }
 
 /* ============================================================
    12. 页脚
@@ -1095,6 +1151,7 @@ input, textarea, select, button {
   .float-tools { right: 12px; bottom: 72px; }
   .post-item .d { display: none; }
   .error-404 .big { font-size: 64px; }
+  .comment-form { grid-template-columns: 1fr; }
 }
 
 /* 减少动态偏好 */
@@ -1107,12 +1164,25 @@ input, textarea, select, button {
    栏目专属视觉 — 每个栏目页有独立的美学气质
    ============================================================ */
 
+/* 信天翁文章卡：航海日志风（全局可用） */
+.log-card{display:grid;grid-template-columns:120px 1fr;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-bottom:20px;transition:border-color var(--t-base)}
+.log-card:hover{border-color:var(--brand)}
+.log-date{background:linear-gradient(180deg,#2a3a4a,#1a2530);color:#b8d0e0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 12px;font-family:var(--font-mono)}
+.log-date .day{font-size:28px;font-weight:700;line-height:1}
+.log-date .mon{font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin-top:6px;opacity:.7}
+.log-body{padding:20px 24px}
+.log-body h3{font-size:17px;margin-bottom:6px}
+.log-body h3 a:hover{color:var(--brand)}
+.log-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:8px}
+.log-body .log-meta{display:flex;gap:14px;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+
 /* === 信天翁 · 海与飞翔 === */
 .cat-albatross .cat-hero{
   background:linear-gradient(160deg,#2a3a4a,#1a2530);
   border-radius:var(--r-hero);overflow:hidden;position:relative;min-height:340px;display:flex;align-items:center;justify-content:center;
+  background-size:cover;background-position:center;
 }
-.cat-albatross .cat-hero::before{content:"";position:absolute;inset:0;background:url("../papervoyage/assets/img/hero-default.jpg") center/cover;opacity:.5;mix-blend-mode:luminosity}
+.cat-albatross .cat-hero::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.3);mix-blend-mode:luminosity}
 .cat-albatross .cat-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,35,50,.3),rgba(20,35,50,.7))}
 .cat-albatross .cat-hero-inner{position:relative;z-index:2;text-align:center;color:#e8f0f5;padding:60px 40px}
 .cat-albatross .cat-hero-inner .en-sub{color:rgba(180,200,215,.7);display:block;margin-bottom:14px}
@@ -1120,23 +1190,35 @@ input, textarea, select, button {
 .cat-albatross .cat-hero-inner p{font-family:var(--font-serif);font-size:15px;color:rgba(220,235,245,.8);margin-top:14px;max-width:480px;margin-left:auto;margin-right:auto}
 .cat-albatross .wind-lines{position:absolute;inset:0;z-index:1;opacity:.3}
 .cat-albatross .wind-lines svg{width:100%;height:100%}
-/* 信天翁文章卡：航海日志风 */
-.cat-albatross .log-card{display:grid;grid-template-columns:120px 1fr;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);overflow:hidden;margin-bottom:20px;transition:border-color var(--t-base)}
-.cat-albatross .log-card:hover{border-color:var(--brand)}
-.cat-albatross .log-date{background:linear-gradient(180deg,#2a3a4a,#1a2530);color:#b8d0e0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 12px;font-family:var(--font-mono)}
-.cat-albatross .log-date .day{font-size:28px;font-weight:700;line-height:1}
-.cat-albatross .log-date .mon{font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin-top:6px;opacity:.7}
-.cat-albatross .log-body{padding:20px 24px}
-.cat-albatross .log-body h3{font-size:17px;margin-bottom:6px}
-.cat-albatross .log-body p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:8px}
-.cat-albatross .log-body .log-meta{display:flex;gap:14px;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+/* 信天翁 Hero 专属背景（已无硬编码图片，由 PHP 内联输出） */
+
+/* 通用默认 Hero（无专属风格的分类，如拼音别名/未分类） */
+.cat-hero-default {
+  background: linear-gradient(160deg, #2a3a4a, #1a2530);
+  border-radius: var(--r-hero);
+  overflow: hidden;
+  position: relative;
+  min-height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+}
+.cat-hero-default::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, .3); mix-blend-mode: luminosity; }
+.cat-hero-default::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20, 30, 40, .3), rgba(20, 30, 40, .72)); }
+.cat-hero-default .cat-hero-inner { position: relative; z-index: 2; text-align: center; color: #e8f0f5; padding: 60px 40px; }
+.cat-hero-default .cat-hero-inner .en-sub { color: rgba(225, 225, 220, .72); display: block; margin-bottom: 14px; }
+.cat-hero-default .cat-hero-inner h1 { font-size: 42px; color: #fff; letter-spacing: .08em; }
+.cat-hero-default .cat-hero-inner p { font-family: var(--font-serif); font-size: 15px; color: rgba(235, 235, 230, .8); margin-top: 14px; max-width: 480px; margin-left: auto; margin-right: auto; }
 
 /* === 遊記 · 路与邮戳 === */
 .cat-travels .cat-hero{
   background:linear-gradient(135deg,#3d3023,#5c4936);
-  border-radius:var(--r-hero);overflow:hidden;position:relative;min-height:340px;display:flex;align-items:flex-end
+  border-radius:var(--r-hero);overflow:hidden;position:relative;min-height:340px;display:flex;align-items:flex-end;
+  background-size:cover;background-position:center;
 }
-.cat-travels .cat-hero::before{content:"";position:absolute;inset:0;background:url("../papervoyage/assets/img/card-essay.jpg") center/cover;opacity:.4;mix-blend-mode:overlay}
+.cat-travels .cat-hero::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.3);mix-blend-mode:overlay}
 .cat-travels .cat-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(50,38,28,.8),transparent 60%)}
 .cat-travels .cat-hero-inner{position:relative;z-index:2;padding:48px;color:#f5ede0;max-width:600px}
 .cat-travels .cat-hero-inner .en-sub{color:rgba(230,215,190,.7);display:block;margin-bottom:12px}
@@ -1164,8 +1246,9 @@ input, textarea, select, button {
 .cat-films .page-head .en-sub{color:#666}
 .cat-films .cat-hero{
   background:#000;border-radius:var(--r-hero);overflow:hidden;position:relative;min-height:360px;display:flex;align-items:center;
+  background-size:cover;background-position:center;
 }
-.cat-films .cat-hero::before{content:"";position:absolute;inset:0;background:url("../papervoyage/assets/img/card-film.jpg") center/cover;opacity:.35}
+.cat-films .cat-hero::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.4)}
 .cat-films .cat-hero::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(255,200,100,.08),transparent 60%)}
 .cat-films .cat-hero-inner{position:relative;z-index:2;padding:60px;color:#e0d8c8}
 .cat-films .cat-hero-inner .en-sub{color:#8a7a5a;display:block;margin-bottom:14px}
@@ -1237,8 +1320,8 @@ input, textarea, select, button {
 .cat-dreams .dream-card .dream-meta{font-family:var(--font-mono);font-size:11px;color:#8a82a8}
 
 @media(max-width:768px){
-  .cat-albatross .log-card{grid-template-columns:1fr}
-  .cat-albatross .log-date{flex-direction:row;gap:12px;padding:12px 16px}
+  .log-card{grid-template-columns:1fr}
+  .log-date{flex-direction:row;gap:12px;padding:12px 16px}
   .cat-films .filmstrip{display:none}
   .cat-essays .cat-hero-inner h1{font-size:28px}
   .cat-dreams .cat-hero-inner h1{font-size:26px}
