@@ -170,6 +170,32 @@ function papervoyage_customize_register( $wp_customize ) {
 		)
 	);
 
+	/* ---------- 分类归档设置 ---------- */
+	$wp_customize->add_section(
+		'papervoyage_category_options',
+		array(
+			'title' => __( '分类归档设置', 'papervoyage' ),
+			'panel' => 'papervoyage_panel',
+		)
+	);
+
+	$wp_customize->add_setting(
+		'unify_category_cards',
+		array(
+			'default'           => true,
+			'sanitize_callback' => 'wp_validate_boolean',
+		)
+	);
+	$wp_customize->add_control(
+		'unify_category_cards',
+		array(
+			'label'       => __( '统一分类卡片为随笔（日志）格式', 'papervoyage' ),
+			'description' => __( '开启后，各分类目录（杂文、游记等）文章列表均统一使用带左侧深色日期块的随笔卡片格式。', 'papervoyage' ),
+			'section'     => 'papervoyage_category_options',
+			'type'        => 'checkbox',
+		)
+	);
+
 	/* ---------- 社交链接 ---------- */
 	$wp_customize->add_section(
 		'papervoyage_social',
@@ -201,6 +227,48 @@ function papervoyage_customize_register( $wp_customize ) {
 				'label'   => sprintf( __( '%s 链接', 'papervoyage' ), $label ),
 				'section' => 'papervoyage_social',
 				'type'    => 'url',
+			)
+		);
+	}
+
+	/* ---------- 关于我页面设置 ---------- */
+	$wp_customize->add_section(
+		'papervoyage_about',
+		array(
+			'title' => __( '关于我页面', 'papervoyage' ),
+			'panel' => 'papervoyage_panel',
+		)
+	);
+
+	$about_fields = array(
+		'about_name'            => array( 'label' => __( '姓名 / 署名', 'papervoyage' ), 'default' => '陈纸旅 / Chen ZhiLv' ),
+		'about_quote'           => array( 'label' => __( '个人引言金句', 'papervoyage' ), 'default' => '「写东西，是因为不写会生病。旅行，是因为不走去生病。摄影，是因为不拍会失去证据。」' ),
+		'about_since'           => array( 'label' => __( '起步年份（Since）', 'papervoyage' ), 'default' => '2019.04' ),
+		'about_now_in'          => array( 'label' => __( '常驻城市（Now In）', 'papervoyage' ), 'default' => '杭州' ),
+		'about_camera'          => array( 'label' => __( '相机设备（Camera）', 'papervoyage' ), 'default' => 'Leica M6' ),
+		'about_coffee'          => array( 'label' => __( '咖啡偏好（Coffee）', 'papervoyage' ), 'default' => '浅烘 · 果酸' ),
+		'about_music'           => array( 'label' => __( '音乐偏好（Music）', 'papervoyage' ), 'default' => '坂本龙一' ),
+		'about_signature'       => array( 'label' => __( '落款签名', 'papervoyage' ), 'default' => '纸旅，写于某个秋天的下午' ),
+		'about_weibo_handle'    => array( 'label' => __( '微博账号名', 'papervoyage' ), 'default' => '@纸旅' ),
+		'about_zhihu_handle'    => array( 'label' => __( '知乎账号名', 'papervoyage' ), 'default' => '@纸旅' ),
+		'about_github_handle'   => array( 'label' => __( 'GitHub 账号名', 'papervoyage' ), 'default' => '@papervoyage' ),
+		'about_bilibili_handle' => array( 'label' => __( 'B站账号名', 'papervoyage' ), 'default' => '@纸旅的旅行箱' ),
+	);
+
+	foreach ( $about_fields as $key => $meta ) {
+		$wp_customize->add_setting(
+			$key,
+			array(
+				'default'           => $meta['default'],
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+		$wp_customize->add_control(
+			$key,
+			array(
+				'label'   => $meta['label'],
+				'section' => 'papervoyage_about',
+				'type'    => 'text',
 			)
 		);
 	}

@@ -118,12 +118,38 @@ function papervoyage_nav_en_fallback( $title ) {
 
 class PaperVoyage_Nav_Walker extends Walker_Nav_Menu {
 	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
-		$classes     = empty( $item->classes ) ? array() : (array) $item->classes;
+		$classes = empty( $item->classes ) ? array() : (array) $item->classes;
+
+		// 检查是否为首页链接：在首页时确保具有高亮 class
+		$is_home_current = false;
+		if ( is_front_page() || is_home() ) {
+			$item_url = untrailingslashit( (string) $item->url );
+			$home_url = untrailingslashit( home_url( '/' ) );
+			$site_url = untrailingslashit( site_url( '/' ) );
+			if ( $item_url === $home_url || $item_url === $site_url || $item->url === '/' || '' === $item_url || in_array( 'menu-item-home', $classes, true ) ) {
+				$is_home_current = true;
+				if ( ! in_array( 'current-menu-item', $classes, true ) ) {
+					$classes[] = 'current-menu-item';
+				}
+				if ( ! in_array( 'current_page_item', $classes, true ) ) {
+					$classes[] = 'current_page_item';
+				}
+			}
+		}
+
 		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
 		$output     .= '<li class="' . esc_attr( $class_names ) . '">';
 
+		$is_current = $is_home_current
+			|| in_array( 'current-menu-item', $classes, true )
+			|| in_array( 'current_page_item', $classes, true )
+			|| in_array( 'current-category', $classes, true )
+			|| in_array( 'current-menu-parent', $classes, true )
+			|| in_array( 'current-menu-ancestor', $classes, true );
+
 		$atts = array(
-			'href' => ! empty( $item->url ) ? $item->url : '',
+			'href'  => ! empty( $item->url ) ? $item->url : '',
+			'class' => $is_current ? 'active' : '',
 		);
 		$attributes = '';
 		foreach ( $atts as $attr => $value ) {
@@ -146,6 +172,27 @@ class PaperVoyage_Nav_Walker extends Walker_Nav_Menu {
 		$output      .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
 	}
 }
+
+/**
+ * 确保在首页时，指向首页的菜单项必定包含 current-menu-item / current_page_item
+ */
+function papervoyage_nav_menu_home_class( $classes, $item ) {
+	if ( is_front_page() || is_home() ) {
+		$item_url = untrailingslashit( (string) $item->url );
+		$home_url = untrailingslashit( home_url( '/' ) );
+		$site_url = untrailingslashit( site_url( '/' ) );
+		if ( $item_url === $home_url || $item_url === $site_url || $item->url === '/' || '' === $item_url || in_array( 'menu-item-home', $classes, true ) ) {
+			if ( ! in_array( 'current-menu-item', $classes, true ) ) {
+				$classes[] = 'current-menu-item';
+			}
+			if ( ! in_array( 'current_page_item', $classes, true ) ) {
+				$classes[] = 'current_page_item';
+			}
+		}
+	}
+	return $classes;
+}
+add_filter( 'nav_menu_css_class', 'papervoyage_nav_menu_home_class', 10, 2 );
 
 /* ============================================================
    社交分享
@@ -319,14 +366,15 @@ function papervoyage_term_en_sub( $term = null ) {
  * 栏目 Hero 区——按 slug 输出完全不同的视觉
  * 支持通过分类 meta 字段 cat_hero_image 设置自定义背景图
  */
-function papervoyage_category_hero( $slug, $cn, $en ) {
-	// 拼音别名 → 栏目风格映射（兼容中文分类的拼音 slug）
+function papervoyage_category_hero( $slug, $cn, $en, $desc = '' ) {
+	// 拼音别名 → 栏目风格映射（兼容中文分类的拼音 slug，杂文统一为随笔风格）
 	$alias = array(
-		'suibi'  => 'albatross',
-		'youji'  => 'travels',
-		'yingshi' => 'films',
-		'zaowen'  => 'essays',
-		'zawen'   => 'essays',
+		'suibi'    => 'albatross',
+		'youji'    => 'travels',
+		'yingshi'  => 'films',
+		'zaowen'   => 'albatross',
+		'zawen'    => 'albatross',
+		'essays'   => 'albatross',
 		'mengjing' => 'dreams',
 	);
 	$style_key = $alias[ $slug ] ?? $slug;
@@ -341,6 +389,13 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 
 	switch ( $style_key ) {
 		case 'albatross':
+		case 'essays':
+			$default_quote = ( 'essays' === $slug || 'zawen' === $slug || 'zaowen' === $slug )
+				? '写东西，是因为不写会生病。这些是没生病的证据。'
+				: '它们可以连续飞行几千公里不落地，但一旦起飞，就几乎不再回头。';
+			$hero_quote = ! empty( $desc ) ? $desc : $default_quote;
+			$default_en = ( 'essays' === $slug || 'zawen' === $slug || 'zaowen' === $slug ) ? 'Notes' : 'The Wandering Albatross';
+			$hero_en = ! empty( $en ) ? $en : $default_en;
 			?>
 			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="wind-lines" aria-hidden="true"><svg viewBox="0 0 1200 340" preserveAspectRatio="none">
@@ -349,9 +404,9 @@ function papervoyage_category_hero( $slug, $cn, $en ) {
 					<path d="M0,210 Q300,170 600,220 T1200,200" fill="none" stroke="rgba(180,200,215,.12)" stroke-width="1"/>
 				</svg></div>
 				<div class="cat-hero-inner">
-					<span class="en-sub"><?php echo esc_html( $en ? $en : 'The Wandering Albatross' ); ?></span>
+					<span class="en-sub"><?php echo esc_html( $hero_en ); ?></span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
-					<p>它们可以连续飞行几千公里不落地，但一旦起飞，就几乎不再回头。</p>
+					<p><?php echo esc_html( $hero_quote ); ?></p>
 				</div>
 			</div>
 			<?php
@@ -435,16 +490,40 @@ function papervoyage_category_card( $slug ) {
 	$words = papervoyage_word_count();
 	$thumb = has_post_thumbnail() ? get_the_post_thumbnail_url( null, 'papervoyage-card' ) : '';
 
-	// 拼音别名 → 栏目卡片风格映射
+	// 拼音别名 → 栏目卡片风格映射（杂文统一使用随笔风格）
 	$alias = array(
-		'suibi'  => 'albatross',
-		'youji'  => 'travels',
-		'yingshi' => 'films',
-		'zaowen'  => 'essays',
-		'zawen'   => 'essays',
+		'suibi'    => 'albatross',
+		'youji'    => 'travels',
+		'yingshi'  => 'films',
+		'zaowen'   => 'albatross',
+		'zawen'    => 'albatross',
+		'essays'   => 'albatross',
 		'mengjing' => 'dreams',
 	);
 	$slug = $alias[ $slug ] ?? $slug;
+
+	// 后台开启「统一分类卡片为随笔/日志卡片样式」或当前为随笔/杂文时，输出日志卡片样式
+	$force_log_card = get_theme_mod( 'unify_category_cards', true );
+	if ( $force_log_card || 'albatross' === $slug || 'essays' === $slug ) {
+		?>
+		<article class="log-card">
+			<a class="log-date" href="<?php echo esc_url( $link ); ?>">
+				<span class="day"><?php echo esc_html( $d[2] ); ?></span>
+				<span class="mon"><?php echo esc_html( $d[1] ); ?>月</span>
+			</a>
+			<div class="log-body">
+				<h3><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $title ); ?></a></h3>
+				<p><?php echo esc_html( $excerpt ); ?></p>
+				<div class="log-meta">
+					<?php papervoyage_temp_badge(); ?>
+					<span><?php echo esc_html( get_the_date( 'Y-m-d' ) ); ?></span>
+					<span><?php echo esc_html( $read ); ?></span>
+				</div>
+			</div>
+		</article>
+		<?php
+		return;
+	}
 
 	switch ( $slug ) {
 		case 'albatross':
@@ -561,13 +640,14 @@ function papervoyage_category_body_class( $classes ) {
 		$cat = get_queried_object();
 		if ( $cat && $cat->slug ) {
 			$classes[] = 'cat-' . $cat->slug;
-			// 拼音别名也映射到对应栏目风格类，让专属 CSS 生效（如 cat-suibi → cat-albatross）
+			// 拼音别名也映射到对应栏目风格类，让专属 CSS 生效（杂文统一映射为 albatross 随笔风格）
 			$alias = array(
 				'suibi'    => 'albatross',
 				'youji'    => 'travels',
 				'yingshi'  => 'films',
-				'zaowen'   => 'essays',
-				'zawen'    => 'essays',
+				'zaowen'   => 'albatross',
+				'zawen'    => 'albatross',
+				'essays'   => 'albatross',
 				'mengjing' => 'dreams',
 			);
 			if ( isset( $alias[ $cat->slug ] ) ) {

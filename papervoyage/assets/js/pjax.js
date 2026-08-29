@@ -67,11 +67,13 @@
 	/* ---------- 导航高亮随 URL 迁移 ---------- */
 	function updateNav(url) {
 		var here = url.pathname.replace(/\/+$/, '');
+		var isHereHome = (here === '' || here === '/');
 		$$('.main-navigation a').forEach(function (a) {
 			var u = absUrl(a.getAttribute('href') || '');
 			if (!u) return;
 			var there = u.pathname.replace(/\/+$/, '');
-			var hit = there !== '' && there !== '/' && here === there;
+			var isThereHome = (there === '' || there === '/');
+			var hit = isHereHome ? isThereHome : (!isThereHome && here === there);
 			a.classList.toggle('active', hit);
 			if (a.parentElement) {
 				a.parentElement.classList.toggle('current-menu-item', hit);
@@ -240,4 +242,7 @@
 		if (!navigable(url)) { location.reload(); return; }
 		navigate(location.href, false, (e.state && typeof e.state.scroll === 'number') ? e.state.scroll : 0);
 	});
+
+	/* ---------- 初始化高亮同步 ---------- */
+	updateNav(absUrl(location.href));
 })();

@@ -11,3 +11,6 @@ Thumbs.db
 # 编辑器
 .vscode/
 .idea/
+
+# 主题打包产物
+*.zip

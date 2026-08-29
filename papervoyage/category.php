@@ -24,7 +24,7 @@ $desc = isset( $desc_lines[1] ) ? $desc_lines[1] : ( $cn ? '「' . $cn . '」栏
 <div class="wrap">
 
 		<!-- 栏目专属 Hero -->
-		<?php papervoyage_category_hero( $slug, $cn, $en ); ?>
+		<?php papervoyage_category_hero( $slug, $cn, $en, $desc ); ?>
 
 		<div style="height:40px"></div>
 
