@@ -9,7 +9,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PAPERVOYAGE_VERSION', '1.4.0' );
+/**
+ * 主题版本号：自动读取 style.css 头部的 Version 字段。
+ * 这样每次升级时只需修改 style.css 的 Version，CSS/JS 的缓存版本号（?ver=xxx）会同步变化，
+ * 浏览器与服务端缓存即自动失效，避免出现"已上传新版但页面无变化"的缓存问题。
+ */
+if ( ! function_exists( 'papervoyage_get_version' ) ) {
+	function papervoyage_get_version() {
+		static $ver = null;
+		if ( null === $ver ) {
+			$theme_data = wp_get_theme();
+			$ver        = $theme_data->get( 'Version' );
+			if ( ! $ver ) {
+				$ver = '1.4.7';
+			}
+		}
+		return $ver;
+	}
+}
+define( 'PAPERVOYAGE_VERSION', papervoyage_get_version() );
 define( 'PAPERVOYAGE_DIR', get_template_directory() );
 define( 'PAPERVOYAGE_URI', get_template_directory_uri() );
 

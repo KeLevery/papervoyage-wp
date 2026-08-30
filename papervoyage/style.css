@@ -4,7 +4,7 @@ Theme URI: https://example.com/papervoyage
 Author: kele
 Author URI: https://example.com
 Description: 纸面极简 × 手作温度 × 数字诗意 的个人出版型博客主题。灵感源自孤斗 GUDOU × D.DESIGN 设计系统：纸灰底色、豆沙红单点强调、中英双层排版、「温度 °C」热度隐喻、波浪分隔与取景框引文。支持自定义菜单、特色图片、小工具、明暗双主题。
-Version: 1.4.5
+Version: 1.4.11
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -430,6 +430,8 @@ input, textarea, select, button {
    6. Hero（首屏）
    ============================================================ */
 .hero { padding: 40px 0 0; }
+/* 首页大封面：顶部不留白，紧贴导航下方，消除「图上方白色缝隙」 */
+.is-front .hero { padding-top: 0; }
 .hero-inner {
   position: relative;
   border-radius: var(--r-hero);
@@ -447,6 +449,20 @@ input, textarea, select, button {
   inset: 0;
   background: linear-gradient(0deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .05) 60%);
 }
+/* 首页大封面：铺满全宽后，高度按视口高度撑高，避免横向拉宽后显得矮扁 */
+.is-front .hero-inner {
+  min-height: 65vh;
+}
+/* —— 首页大封面破框：撑满浏览器全宽（突破 .wrap 的 1200px 限制）——
+   利用 100vw + 负边距等价于「相对视口居中」，让背景图横向铺满整个浏览器宽度；
+   圆角去掉（铺满后两侧圆角会与浏览器边缘割裂）。
+   .is-front 由 template-functions.php 在 is_front_page() 时注入 body，确定命中首页。 */
+.is-front .hero-inner {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  border-radius: 0;
+}
 .hero-content {
   position: relative;
   z-index: 2;
@@ -456,6 +472,17 @@ input, textarea, select, button {
 .hero-content .en-sub { color: rgba(255, 255, 255, .7); display: block; margin-bottom: 12px; }
 .hero-content h1, .hero-content h2 { font-size: 36px; line-height: 1.35; margin: 0 0 14px; color: #fff; }
 .hero-content p { color: rgba(255, 255, 255, .8); font-size: 14px; margin: 0; }
+
+/* 破框后文字回落到全站 1200px 内容区左缘（与导航/正文左缘对齐）：
+   .hero-inner 已贴到视口左缘(0)，这里用 vw 计算把内容推回到 .wrap 的 24px 内边距处，
+   再叠加原有的 56px padding，保持与破框前一致的视觉留白。 */
+.is-front .hero-content {
+  margin-left: calc(50vw - 600px + 24px);
+}
+/* 窄屏：视口小于 1248px(1200+2×24) 时，calc 结果为负，文字会顶到边缘；退回安全边距 */
+@media (max-width: 1248px) {
+  .is-front .hero-content { margin-left: 0; }
+}
 
 /* 取景框直角（只画两条边，呈 L 形） */
 .hero-corners span {
@@ -502,6 +529,14 @@ input, textarea, select, button {
 /* 波浪分隔 */
 .hero-waves { position: relative; height: 90px; margin-top: -64px; z-index: 4; pointer-events: none; }
 .hero-waves svg { width: 100%; height: 100%; display: block; }
+/* 首页大封面：波浪随大图等比放大（高度↑、上嵌深度同步↑，保持「从图中涌出」的比例感） */
+.is-front .hero-waves { height: 220px; margin-top: -156px; }
+/* 首页波浪破框：和大图一样撑满浏览器全宽（否则会被 .wrap 限制在 1200px，左右铺不满） */
+.is-front .hero-waves {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
 .hero-waves .wave { animation: move-forever 12s linear infinite; }
 .hero-waves .wave.w2 { animation-duration: 9s; animation-direction: reverse; }
 .hero-waves .wave.w3 { animation-duration: 15s; }
@@ -520,6 +555,8 @@ input, textarea, select, button {
    7. 首页栏目栅格
    ============================================================ */
 .home-section { padding: 48px 0 8px; }
+/* 首页大封面下方首个内容区：加大顶部留白，避免大图与文章列表贴得太挤 */
+.is-front .home-section { padding-top: 80px; }
 .home-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1151,8 +1188,41 @@ input, textarea, select, button {
   font-weight: 500;
   white-space: nowrap;
 }
+/* —— 关于页「全宽自由编辑」兼容补丁 ——
+   背景：主题未提供 theme.json，导致 Gutenberg 块预设类与 alignwide 满宽失效。
+   这里仅作用于关于页（.about-page-content），用高特异性强制两栏铺满、补齐卡片预设色，
+   不影响其他页面。 */
+.about-page-content .wp-block-columns.alignwide,
+.about-page-content .wp-block-columns .alignwide {
+  width: 100%;
+  max-width: 100%;
+}
+.about-page-content .wp-block-columns.alignwide .wp-block-column {
+  flex-grow: 1;
+}
+/* 卡片背景预设（has-base-2-background-color）回退到主题次级底色，自动跟随暗黑模式 */
+.about-page-content .wp-block-group.has-base-2-background-color {
+  background-color: var(--bg-secondary);
+}
+/* 标签/次要文字预设（has-tertiary-color / has-secondary-color）回退到 --muted */
+.about-page-content .has-tertiary-color,
+.about-page-content .has-secondary-color {
+  color: var(--muted);
+}
+/* 中号字号预设回退（has-medium-font-size） */
+.about-page-content .has-medium-font-size {
+  font-size: 16px;
+}
 @media (max-width: 1024px) {
   .about-grid { grid-template-columns: 1fr; }
+  /* 关于页两栏在窄屏堆叠为一栏 */
+  .about-page-content .wp-block-columns.alignwide {
+    flex-direction: column;
+  }
+  .about-page-content .wp-block-columns.alignwide .wp-block-column {
+    flex-basis: 100% !important;
+    width: 100%;
+  }
 }
 
 /* ============================================================
@@ -1273,6 +1343,11 @@ input, textarea, select, button {
   .hero-content { padding: 32px 24px 72px; }
   .hero-content h1, .hero-content h2 { font-size: 26px; }
   .hero-inner { min-height: 300px; border-radius: 20px; }
+  /* 窄屏首页大封面同样铺满、去圆角；高度改用固定值，避免 70vh 在手机上过高挤压内容 */
+  .is-front .hero-inner { border-radius: 0; min-height: 340px; }
+  /* 窄屏波浪与文章区间距同步收敛；窄屏破框负边距归零避免推出屏幕 */
+  .is-front .hero-waves { height: 110px; margin-top: -78px; margin-left: 0; width: 100%; max-width: 100%; }
+  .is-front .home-section { padding-top: 56px; }
   .hero-bubbles { display: none; }
   .single-head h1 { font-size: 26px; }
   .post-nav { grid-template-columns: 1fr; }

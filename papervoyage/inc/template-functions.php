@@ -661,3 +661,16 @@ function papervoyage_category_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', 'papervoyage_category_body_class' );
+
+/**
+ * body_class 过滤器：首页（front-page）注入确定性标识类 is-front
+ * 不依赖 WordPress 默认输出的 .home/.blog（其有无取决于「设置→阅读」的首页配置），
+ * 供 CSS 用 .is-front 精确命中首页专属样式（如大封面破框铺满）。
+ */
+function papervoyage_front_body_class( $classes ) {
+	if ( is_front_page() ) {
+		$classes[] = 'is-front';
+	}
+	return $classes;
+}
+add_filter( 'body_class', 'papervoyage_front_body_class', 11 );
