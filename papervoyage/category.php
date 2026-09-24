@@ -14,11 +14,21 @@ $cat = get_queried_object();
 $slug = $cat ? $cat->slug : '';
 $cn = $cat ? $cat->name : '';
 $en = papervoyage_term_en_sub( $cat );
-$desc_lines = array();
-if ( $cat && $cat->description ) {
-	$desc_lines = array_values( array_filter( array_map( 'trim', explode( "\n", $cat->description ) ) ));
+$desc = '';
+if ( $cat && ! empty( $cat->description ) ) {
+	$desc_lines = array_values( array_filter( array_map( 'trim', explode( "\n", $cat->description ) ) ) );
+	if ( ! empty( $desc_lines ) ) {
+		// 第一行如果包含中文，说明全部都是正文描述；否则第一行为英文副标题，后面全部为正文描述
+		if ( preg_match( '/[\x{4e00}-\x{9fff}]/u', $desc_lines[0] ) ) {
+			$desc = implode( "\n", $desc_lines );
+		} elseif ( count( $desc_lines ) > 1 ) {
+			$desc = implode( "\n", array_slice( $desc_lines, 1 ) );
+		}
+	}
 }
-$desc = isset( $desc_lines[1] ) ? $desc_lines[1] : ( $cn ? '「' . $cn . '」栏目下的全部文章。' : '' );
+if ( ! $desc ) {
+	$desc = $cn ? '「' . $cn . '」栏目下的全部文章。' : '';
+}
 ?>
 
 <div class="wrap">

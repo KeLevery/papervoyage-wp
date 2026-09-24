@@ -57,7 +57,7 @@ demo/                        # 纯静态演示（无需 WordPress 即可预览�
 └── category-*.html          # 各栏目演示
 
 build-theme-zip.ps1          # 打包发布 zip
-papervoyage-1.4.2.zip        # 当前发布包
+papervoyage-1.4.12.zip        # 当前发布包
 ```
 
 ## 🚀 快速开始
@@ -76,7 +76,7 @@ cd demo && python -m http.server 8000
 
 ### 方式二：安装到 WordPress
 
-1. 下载 [`papervoyage-1.4.2.zip`](papervoyage-1.4.2.zip)
+1. 下载 [`papervoyage-1.4.12.zip`](papervoyage-1.4.12.zip)
 2. WordPress 后台 → 外观 → 主题 → 上传主题 → 选择 zip → 安装并启用
 3. 后台 → 外观 → 自定义：配置站点标题、菜单、栏目 Hero 图等
 

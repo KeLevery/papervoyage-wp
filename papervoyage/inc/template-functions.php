@@ -350,12 +350,19 @@ function papervoyage_post_meta() {
    ============================================================ */
 
 function papervoyage_term_en_sub( $term = null ) {
-	$term  = $term ? get_term( $term ) : get_queried_object();
+	$term = $term ? get_term( $term ) : get_queried_object();
 	if ( ! $term || is_wp_error( $term ) || empty( $term->description ) ) {
 		return '';
 	}
 	$lines = array_values( array_filter( array_map( 'trim', explode( "\n", $term->description ) ) ) );
-	return isset( $lines[0] ) ? $lines[0] : '';
+	if ( empty( $lines ) ) {
+		return '';
+	}
+	// 若第一行包含中文字符，说明是纯中文描述而非英文副标题
+	if ( preg_match( '/[\x{4e00}-\x{9fff}]/u', $lines[0] ) ) {
+		return '';
+	}
+	return $lines[0];
 }
 
 /* ============================================================
@@ -412,41 +419,33 @@ function papervoyage_category_hero( $slug, $cn, $en, $desc = '' ) {
 			<?php
 			break;
 		case 'travels':
+			$hero_quote = ! empty( $desc ) ? $desc : '散步不是赶路，是把自己暂时交给一座城市，让它带你走。';
 			?>
 			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="route-dashed" aria-hidden="true"></div>
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Notes on the Road' ); ?></span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
-					<p>散步不是赶路，是把自己暂时交给一座城市，让它带你走。</p>
+					<p><?php echo esc_html( $hero_quote ); ?></p>
 				</div>
 			</div>
 			<?php
 			break;
 		case 'films':
+			$hero_quote = ! empty( $desc ) ? $desc : '在黑暗里坐两小时，借别人的眼睛看一遍世界。';
 			?>
 			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Films' ); ?> · 影視</span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
-					<p>在黑暗里坐两小时，借别人的眼睛看一遍世界。</p>
+					<p><?php echo esc_html( $hero_quote ); ?></p>
 				</div>
 			</div>
 			<div class="filmstrip" aria-hidden="true"></div>
 			<?php
 			break;
-		case 'essays':
-			?>
-			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-				<div class="cat-hero-inner">
-					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Essays' ); ?> · 雜文</span>
-					<h1><?php echo esc_html( $cn ); ?></h1>
-					<p>写东西，是因为不写会生病。这些是没生病的证据。</p>
-				</div>
-			</div>
-			<?php
-			break;
 		case 'dreams':
+			$hero_quote = ! empty( $desc ) ? $desc : '庄周梦蝶，还是蝶梦庄周？这些是醒来后还记得的部分。';
 			?>
 			<div class="cat-hero"<?php echo $hero_style; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<div class="mist" aria-hidden="true">
@@ -459,7 +458,7 @@ function papervoyage_category_hero( $slug, $cn, $en, $desc = '' ) {
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Reality Is But a Dream' ); ?></span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
-					<p>庄周梦蝶，还是蝶梦庄周？这些是醒来后还记得的部分。</p>
+					<p><?php echo esc_html( $hero_quote ); ?></p>
 				</div>
 			</div>
 			<?php
@@ -470,7 +469,7 @@ function papervoyage_category_hero( $slug, $cn, $en, $desc = '' ) {
 				<div class="cat-hero-inner">
 					<span class="en-sub"><?php echo esc_html( $en ? $en : 'Category' ); ?></span>
 					<h1><?php echo esc_html( $cn ); ?></h1>
-					<p><?php echo esc_html( $cat && $cat->description ? $cat->description : '「' . $cn . '」栏目下的全部文章。' ); ?></p>
+					<p><?php echo esc_html( ! empty( $desc ) ? $desc : ( $cn ? '「' . $cn . '」栏目下的全部文章。' : '' ) ); ?></p>
 				</div>
 			</div>
 			<?php
@@ -490,21 +489,20 @@ function papervoyage_category_card( $slug ) {
 	$words = papervoyage_word_count();
 	$thumb = has_post_thumbnail() ? get_the_post_thumbnail_url( null, 'papervoyage-card' ) : '';
 
-	// 拼音别名 → 栏目卡片风格映射（杂文统一使用随笔风格）
+	// 拼音别名 → 栏目卡片风格映射
 	$alias = array(
 		'suibi'    => 'albatross',
 		'youji'    => 'travels',
 		'yingshi'  => 'films',
-		'zaowen'   => 'albatross',
-		'zawen'    => 'albatross',
-		'essays'   => 'albatross',
+		'zaowen'   => 'essays',
+		'zawen'    => 'essays',
 		'mengjing' => 'dreams',
 	);
-	$slug = $alias[ $slug ] ?? $slug;
+	$target_slug = $alias[ $slug ] ?? $slug;
 
-	// 后台开启「统一分类卡片为随笔/日志卡片样式」或当前为随笔/杂文时，输出日志卡片样式
+	// 后台开启「统一分类卡片为随笔/日志卡片样式」时，输出日志卡片样式
 	$force_log_card = get_theme_mod( 'unify_category_cards', true );
-	if ( $force_log_card || 'albatross' === $slug || 'essays' === $slug ) {
+	if ( $force_log_card ) {
 		?>
 		<article class="log-card">
 			<a class="log-date" href="<?php echo esc_url( $link ); ?>">
@@ -525,7 +523,7 @@ function papervoyage_category_card( $slug ) {
 		return;
 	}
 
-	switch ( $slug ) {
+	switch ( $target_slug ) {
 		case 'albatross':
 			?>
 			<article class="log-card">

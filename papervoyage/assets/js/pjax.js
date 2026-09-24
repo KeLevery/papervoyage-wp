@@ -5,6 +5,7 @@
  * header/导航/footer 不重渲染、CSS/JS 不重载、全程无白屏。
  * - 主题定制器预览中自动停用（预览需要真实加载）
  * - 登录态（admin-bar）不使用缓存，避免陈旧的表单 nonce
+ * - 自动同步服务端导航高亮状态，文章页精准维持所属栏目点亮
  * - 切到文章页时按需补载 comment-reply 脚本
  * - 任何异常退回整页跳转（渐进增强：真实链接 + 完整 HTML 仍在，SEO 不受影响）
  */
@@ -35,6 +36,8 @@
 		if (nav) nav.classList.remove('is-open');
 		var mask = document.getElementById('nav-mask');
 		if (mask) mask.classList.remove('is-open');
+		var menuToggle = document.getElementById('menu-toggle');
+		if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
 		document.body.style.overflow = '';
 	}
 
@@ -64,8 +67,9 @@
 		});
 	}
 
-	/* ---------- 导航高亮随 URL 迁移 ---------- */
+	/* ---------- 导航高亮同步（优先采用服务端渲染高亮，客户端前缀兜底） ---------- */
 	function updateNav(url) {
+		if (!url) return;
 		var here = url.pathname.replace(/\/+$/, '');
 		var isHereHome = (here === '' || here === '/');
 		$$('.main-navigation a').forEach(function (a) {
@@ -73,7 +77,7 @@
 			if (!u) return;
 			var there = u.pathname.replace(/\/+$/, '');
 			var isThereHome = (there === '' || there === '/');
-			var hit = isHereHome ? isThereHome : (!isThereHome && here === there);
+			var hit = isHereHome ? isThereHome : (!isThereHome && (here === there || here.indexOf(there + '/') === 0));
 			a.classList.toggle('active', hit);
 			if (a.parentElement) {
 				a.parentElement.classList.toggle('current-menu-item', hit);
@@ -91,10 +95,12 @@
 		var doc = new DOMParser().parseFromString(html, 'text/html');
 		var mainEl = doc.querySelector('main');
 		if (!mainEl) throw new Error('no <main> in response');
+		var navEl = doc.querySelector('#site-navigation') || doc.querySelector('.main-navigation');
 		return {
 			title: doc.title,
 			bodyAttrs: collectBodyAttrs(doc.body),
 			mainHTML: mainEl.innerHTML,
+			navHTML: navEl ? navEl.innerHTML : null,
 			pageScripts: collectPageScripts(doc, mainEl)
 		};
 	}
@@ -138,14 +144,29 @@
 		applyBodyAttrs(parsed.bodyAttrs);
 		main.innerHTML = parsed.mainHTML;
 		runScripts(main);
-		updateNav(absUrl(href));
+
+		/* 优先采用新页面由 WordPress 生成的精确高亮导航 */
+		if (parsed.navHTML) {
+			var curNav = document.getElementById('site-navigation') || document.querySelector('.main-navigation');
+			if (curNav) curNav.innerHTML = parsed.navHTML;
+		} else {
+			updateNav(absUrl(href));
+		}
+
 		if (window.papervoyageReveal) window.papervoyageReveal();
 		ensureCommentReply();
-		(parsed.pageScripts || []).forEach(function (code) { /* 页面级内联脚本重跑 */
+
+		/* 清理上一次页面动态注入的内联脚本，防止重复声明变量和 DOM 泄漏 */
+		$$('script[data-pv-page-script]').forEach(function (s) {
+			if (s.parentNode) s.parentNode.removeChild(s);
+		});
+		(parsed.pageScripts || []).forEach(function (code) {
 			var s = document.createElement('script');
-			s.text = code;
+			s.setAttribute('data-pv-page-script', 'true');
+			s.text = '(function(){' + code + '})();';
 			document.body.appendChild(s);
 		});
+
 		if (hash) {
 			var target = document.getElementById(hash.slice(1)) || main.querySelector(hash);
 			if (target) { target.scrollIntoView(); return; }
@@ -175,7 +196,10 @@
 		if (!url || !navigable(url)) { location.href = href; return; }
 		if (busy) return;
 		var key = url.pathname + url.search;
-		if (!push && key === currentKey) return;
+		if (!push && key === currentKey) {
+			if (typeof scrollTop === 'number') window.scrollTo(0, scrollTop);
+			return;
+		}
 		busy = true;
 		dismissOverlays();
 		var done = function (parsed) {
@@ -228,10 +252,10 @@
 		e.preventDefault();
 		var qs = new URLSearchParams();
 		new FormData(form).forEach(function (value, key) {
-			if (value) qs.append(key, value);
+			qs.append(key, value);
 		});
 		var href = action.origin + action.pathname + (qs.toString() ? '?' + qs.toString() : '');
-		if (href !== location.href) navigate(href, true);
+		navigate(href, true);
 	});
 
 	/* ---------- 前进/后退 ---------- */

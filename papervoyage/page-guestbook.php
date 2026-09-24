@@ -12,17 +12,16 @@ get_header();
 ?>
 
 <div class="wrap">
+	<?php
+	while ( have_posts() ) :
+		the_post();
+		?>
 		<header class="page-head reveal">
 			<span class="en-sub"><?php esc_html_e( 'Neighborhood Voices · 街坊留言', 'papervoyage' ); ?></span>
 			<h1><?php the_title(); ?></h1>
-			<?php
-			while ( have_posts() ) :
-				the_post();
-				if ( get_the_content() ) :
-					?>
-					<div class="desc entry-content" style="font-size:14px;max-width:640px"><?php the_content(); ?></div>
-				<?php endif; ?>
-			<?php endwhile; ?>
+			<?php if ( get_the_content() ) : ?>
+				<div class="desc entry-content" style="font-size:14px;max-width:640px"><?php the_content(); ?></div>
+			<?php endif; ?>
 		</header>
 
 		<div class="content-with-sidebar">
@@ -41,6 +40,7 @@ get_header();
 				<?php if ( is_active_sidebar( 'sidebar' ) ) dynamic_sidebar( 'sidebar' ); ?>
 			</aside>
 		</div>
-	</div>
+	<?php endwhile; ?>
+</div>
 
 <?php get_footer(); ?>

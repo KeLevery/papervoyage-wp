@@ -34,6 +34,7 @@
     var h=document.documentElement;
     var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
     h.setAttribute('data-theme',n);
+    h.style.background=n==='dark'?'#1e2022':'#f1f1f1';
     try{localStorage.setItem('papervoyage-theme',n)}catch(e){}
   });
 
@@ -56,10 +57,16 @@
   /* 复制链接（事件委托：PJAX 替换 main 后新按钮依然生效） */
   document.addEventListener('click', function(e){
     var btn = e.target.closest ? e.target.closest('[data-copy]') : null;
-    if(!btn) return;
+    if(!btn || btn.dataset.copying) return;
     e.preventDefault();
+    btn.dataset.copying = 'true';
     var url=btn.getAttribute('data-copy');
-    var done=function(){var old=btn.textContent;btn.textContent='链接已复制';setTimeout(function(){btn.textContent=old},1500)};
+    var origHTML=btn.innerHTML;
+    var done=function(){
+      var svg=btn.querySelector('svg');
+      btn.innerHTML=(svg?svg.outerHTML+' ':'')+'链接已复制';
+      setTimeout(function(){btn.innerHTML=origHTML;delete btn.dataset.copying;},1500);
+    };
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done).catch(done)}
     else{var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(err){}document.body.removeChild(ta);done()}
   });

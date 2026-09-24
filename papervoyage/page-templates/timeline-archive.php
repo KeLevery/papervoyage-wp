@@ -13,46 +13,59 @@ get_header();
 ?>
 
 <div class="wrap">
-	<header class="page-head">
-		<span class="en-sub"><?php esc_html_e( 'The Archive of Everything', 'papervoyage' ); ?></span>
-		<h1><?php the_title(); ?></h1>
-		<?php if ( have_posts() ) : while ( have_posts() ) : the_post(); ?>
+	<?php
+	while ( have_posts() ) :
+		the_post();
+		?>
+		<header class="page-head">
+			<span class="en-sub"><?php esc_html_e( 'The Archive of Everything', 'papervoyage' ); ?></span>
+			<h1><?php the_title(); ?></h1>
 			<?php if ( get_the_content() ) : ?>
 				<div class="desc entry-content" style="font-size:14px"><?php the_content(); ?></div>
 			<?php endif; ?>
-		<?php endwhile; endif; ?>
-	</header>
+		</header>
+	<?php endwhile; ?>
 
 	<div class="content-with-sidebar">
 		<div class="archive-timeline reveal">
 			<?php
-			global $wpdb;
-			$years = $wpdb->get_col(
-				"SELECT DISTINCT YEAR(post_date) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type = 'post' ORDER BY post_date DESC"
+			$all_posts = new WP_Query(
+				array(
+					'posts_per_page'      => -1,
+					'post_type'           => 'post',
+					'post_status'         => 'publish',
+					'ignore_sticky_posts' => true,
+					'orderby'             => 'date',
+					'order'               => 'DESC',
+				)
 			);
 
-			foreach ( $years as $year ) :
-				$posts = new WP_Query(
-					array(
-						'posts_per_page'      => -1,
-						'year'                => (int) $year,
-						'ignore_sticky_posts' => true,
-					)
-				);
-				?>
-				<section class="archive-year">
-					<h2><?php echo esc_html( $year ); ?></h2>
-					<?php
-					while ( $posts->have_posts() ) :
-						$posts->the_post();
-						get_template_part( 'template-parts/content', 'item' );
-					endwhile;
-					wp_reset_postdata();
-					?>
-				</section>
-			<?php endforeach; ?>
+			$by_year = array();
+			if ( $all_posts->have_posts() ) {
+				while ( $all_posts->have_posts() ) {
+					$all_posts->the_post();
+					$year = get_the_date( 'Y' );
+					$by_year[ $year ][] = get_post();
+				}
+				wp_reset_postdata();
+			}
 
-			<?php if ( empty( $years ) ) : ?>
+			if ( ! empty( $by_year ) ) :
+				global $post;
+				foreach ( $by_year as $year => $year_posts ) :
+					?>
+					<section class="archive-year">
+						<h2><?php echo esc_html( $year ); ?></h2>
+						<?php
+						foreach ( $year_posts as $post ) :
+							setup_postdata( $post );
+							get_template_part( 'template-parts/content', 'item' );
+						endforeach;
+						wp_reset_postdata();
+						?>
+					</section>
+				<?php endforeach; ?>
+			<?php else : ?>
 				<?php get_template_part( 'template-parts/content', 'none' ); ?>
 			<?php endif; ?>
 		</div>

@@ -75,7 +75,14 @@ get_header();
 			<span class="bar"></span>
 			<h2><?php esc_html_e( '最新文章', 'papervoyage' ); ?></h2>
 			<span class="en-sub"><?php esc_html_e( 'Latest Articles', 'papervoyage' ); ?></span>
-			<a class="more-link" href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/?post_type=post' ) ); ?>"><?php esc_html_e( 'More →', 'papervoyage' ); ?></a>
+			<?php
+			$posts_page_id = (int) get_option( 'page_for_posts' );
+			$more_url      = $posts_page_id ? get_permalink( $posts_page_id ) : get_post_type_archive_link( 'post' );
+			if ( ! $more_url ) {
+				$more_url = home_url( '/?post_type=post' );
+			}
+			?>
+			<a class="more-link" href="<?php echo esc_url( $more_url ); ?>"><?php esc_html_e( 'More →', 'papervoyage' ); ?></a>
 		</div>
 
 		<div class="home-grid">

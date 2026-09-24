@@ -108,7 +108,7 @@ function papervoyage_assets() {
 	);
 	wp_enqueue_script( 'papervoyage-pjax', PAPERVOYAGE_URI . '/assets/js/pjax.js', array( 'papervoyage-main' ), PAPERVOYAGE_VERSION, true );
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+	if ( get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
@@ -264,9 +264,7 @@ function papervoyage_category_hero_field_edit( $term ) {
 				<img src="<?php echo esc_url( $hero_url ); ?>" alt="" style="width:100%;border-radius:8px;border:1px solid #ddd">
 			</div>
 			<button type="button" class="button cat-hero-upload-btn" style="margin-top:8px"><?php esc_html_e( '选择图片', 'papervoyage' ); ?></button>
-			<?php if ( $hero_url ) : ?>
-				<button type="button" class="button cat-hero-remove-btn" style="margin-top:8px"><?php esc_html_e( '移除图片', 'papervoyage' ); ?></button>
-			<?php endif; ?>
+			<button type="button" class="button cat-hero-remove-btn" style="margin-top:8px;<?php echo $hero_url ? '' : 'display:none;'; ?>"><?php esc_html_e( '移除图片', 'papervoyage' ); ?></button>
 			<p class="description"><?php esc_html_e( '上传一张大图作为该栏目页的 Hero 背景图（建议 1600×600 以上）。', 'papervoyage' ); ?></p>
 		</td>
 	</tr>
@@ -278,6 +276,9 @@ add_action( 'category_edit_form_fields', 'papervoyage_category_hero_field_edit' 
  * 保存分类 Hero 图片
  */
 function papervoyage_save_category_hero_image( $term_id ) {
+	if ( ! current_user_can( 'edit_term', $term_id ) ) {
+		return;
+	}
 	if ( isset( $_POST['cat_hero_image'] ) ) {
 		$url = esc_url_raw( wp_unslash( $_POST['cat_hero_image'] ) );
 		update_term_meta( $term_id, 'cat_hero_image', $url );

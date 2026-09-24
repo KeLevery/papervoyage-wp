@@ -18,10 +18,15 @@ $default_en  = is_category() ? 'Category' : ( is_tag() ? 'Tagged With' : 'Archiv
 		<h1><?php echo esc_html( get_the_archive_title() ); ?></h1>
 		<?php
 		$desc = get_the_archive_description();
-		// 分类描述约定：第一行英文副标题，其余为简介
 		if ( $term instanceof WP_Term && ! empty( $term->description ) ) {
 			$lines = array_values( array_filter( array_map( 'trim', explode( "\n", $term->description ) ) ) );
-			$desc  = isset( $lines[1] ) ? esc_html( $lines[1] ) : '';
+			if ( ! empty( $lines ) ) {
+				if ( preg_match( '/[\x{4e00}-\x{9fff}]/u', $lines[0] ) ) {
+					$desc = implode( "<br>", $lines );
+				} elseif ( count( $lines ) > 1 ) {
+					$desc = implode( "<br>", array_slice( $lines, 1 ) );
+				}
+			}
 		}
 		if ( $desc ) :
 			?>

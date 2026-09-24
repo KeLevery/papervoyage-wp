@@ -19,7 +19,11 @@ if ( ! $cats && ! $tags ) {
 	<?php if ( $cats ) : ?>
 		<span class="en-sub"><?php esc_html_e( 'Filter by Category', 'papervoyage' ); ?></span>
 		<div class="tag-pills" style="margin-bottom:14px">
-			<a class="tag-pill <?php echo ( ! is_category() && ! is_tag() ) ? 'is-active' : ''; ?>" href="<?php echo esc_url( get_permalink( get_option( 'page_for_posts' ) ) ?: home_url( '/' ) ); ?>">
+			<?php
+			$posts_page_id = (int) get_option( 'page_for_posts' );
+			$all_posts_url = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/' );
+			?>
+			<a class="tag-pill <?php echo ( ! is_category() && ! is_tag() ) ? 'is-active' : ''; ?>" href="<?php echo esc_url( $all_posts_url ); ?>">
 				<?php esc_html_e( '全部', 'papervoyage' ); ?>
 			</a>
 			<?php foreach ( $cats as $cat ) : ?>

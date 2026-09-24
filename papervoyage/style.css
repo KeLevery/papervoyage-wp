@@ -4,7 +4,7 @@ Theme URI: https://example.com/papervoyage
 Author: kele
 Author URI: https://example.com
 Description: 纸面极简 × 手作温度 × 数字诗意 的个人出版型博客主题。灵感源自孤斗 GUDOU × D.DESIGN 设计系统：纸灰底色、豆沙红单点强调、中英双层排版、「温度 °C」热度隐喻、波浪分隔与取景框引文。支持自定义菜单、特色图片、小工具、明暗双主题。
-Version: 1.4.11
+Version: 1.4.12
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -88,6 +88,7 @@ body {
   background: var(--bg);
   transition: background var(--t-base), color var(--t-base);
   word-wrap: break-word;
+  overflow-x: hidden;
 }
 
 img { max-width: 100%; height: auto; display: block; }
@@ -430,8 +431,8 @@ input, textarea, select, button {
    6. Hero（首屏）
    ============================================================ */
 .hero { padding: 40px 0 0; }
-/* 首页大封面：顶部不留白，紧贴导航下方，消除「图上方白色缝隙」 */
-.is-front .hero { padding-top: 0; }
+/* 首页大封面：顶部不留白，紧贴导航下方，消除「图上方白色缝隙」；防横向滚动条溢出 */
+.is-front .hero { padding-top: 0; overflow: hidden; }
 .hero-inner {
   position: relative;
   border-radius: var(--r-hero);

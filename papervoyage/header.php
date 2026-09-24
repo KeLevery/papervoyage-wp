@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
 /* 暗色模式尽早应用 + 立即铺纸色底：文档初始绘制（CSS 到达前）不再是浏览器默认白底，消除跳转白屏 */
-(function(){var d=document.documentElement,b='#f1f1f1';try{var t=localStorage.getItem('papervoyage-theme');if(t){d.setAttribute('data-theme',t);if(t==='dark')b='#1b1d20';}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){d.setAttribute('data-theme','dark');b='#1b1d20';}}catch(e){}d.style.background=b;})();
+(function(){var d=document.documentElement,b='#f1f1f1';try{var t=localStorage.getItem('papervoyage-theme');if(t){d.setAttribute('data-theme',t);if(t==='dark')b='#1e2022';}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){d.setAttribute('data-theme','dark');b='#1e2022';}}catch(e){}d.style.background=b;})();
 </script>
 <?php wp_head(); ?>
 </head>
