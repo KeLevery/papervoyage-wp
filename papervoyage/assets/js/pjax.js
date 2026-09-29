@@ -154,6 +154,7 @@
 		}
 
 		if (window.papervoyageReveal) window.papervoyageReveal();
+		if (window.papervoyageInitSlider) window.papervoyageInitSlider();
 		ensureCommentReply();
 
 		/* 清理上一次页面动态注入的内联脚本，防止重复声明变量和 DOM 泄漏 */

@@ -4,7 +4,7 @@ Theme URI: https://example.com/papervoyage
 Author: kele
 Author URI: https://example.com
 Description: 纸面极简 × 手作温度 × 数字诗意 的个人出版型博客主题。灵感源自孤斗 GUDOU × D.DESIGN 设计系统：纸灰底色、豆沙红单点强调、中英双层排版、「温度 °C」热度隐喻、波浪分隔与取景框引文。支持自定义菜单、特色图片、小工具、明暗双主题。
-Version: 1.4.12
+Version: 1.5.0
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -438,58 +438,256 @@ input, textarea, select, button {
   border-radius: var(--r-hero);
   overflow: hidden;
   min-height: 380px;
-  display: flex;
-  align-items: flex-end;
-  background: linear-gradient(135deg, #2b2b2b, #4a3a34);
+  background: #2b2b2b;
   color: #f1f1f1;
-}
-.hero-inner.has-image { background-size: cover; background-position: center; }
-.hero-inner::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(0, 0, 0, .62), rgba(0, 0, 0, .05) 60%);
 }
 /* 首页大封面：铺满全宽后，高度按视口高度撑高，避免横向拉宽后显得矮扁 */
 .is-front .hero-inner {
   min-height: 65vh;
-}
-/* —— 首页大封面破框：撑满浏览器全宽（突破 .wrap 的 1200px 限制）——
-   利用 100vw + 负边距等价于「相对视口居中」，让背景图横向铺满整个浏览器宽度；
-   圆角去掉（铺满后两侧圆角会与浏览器边缘割裂）。
-   .is-front 由 template-functions.php 在 is_front_page() 时注入 body，确定命中首页。 */
-.is-front .hero-inner {
   width: 100vw;
   max-width: 100vw;
   margin-left: calc(50% - 50vw);
   border-radius: 0;
 }
-.hero-content {
-  position: relative;
-  z-index: 2;
-  padding: 56px 56px 88px; /* 底部预留波浪覆盖区 */
-  max-width: 720px;
-}
-.hero-content .en-sub { color: rgba(255, 255, 255, .7); display: block; margin-bottom: 12px; }
-.hero-content h1, .hero-content h2 { font-size: 36px; line-height: 1.35; margin: 0 0 14px; color: #fff; }
-.hero-content p { color: rgba(255, 255, 255, .8); font-size: 14px; margin: 0; }
 
-/* 破框后文字回落到全站 1200px 内容区左缘（与导航/正文左缘对齐）：
-   .hero-inner 已贴到视口左缘(0)，这里用 vw 计算把内容推回到 .wrap 的 24px 内边距处，
-   再叠加原有的 56px padding，保持与破框前一致的视觉留白。 */
-.is-front .hero-content {
+/* 轮播图幻灯片容器 */
+.hero-slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 380px;
+}
+.is-front .hero-slider {
+  min-height: 65vh;
+}
+.hero-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+}
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.05);
+  transition: opacity 0.85s cubic-bezier(0.25, 1, 0.5, 1), transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.85s;
+  z-index: 1;
+}
+.hero-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  z-index: 2;
+}
+/* 每一张幻灯片的暗角与文字可读性遮罩 */
+.hero-slide::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(16, 17, 18, 0.78) 0%, rgba(16, 17, 18, 0.28) 45%, rgba(16, 17, 18, 0.42) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-slide .hero-content {
+  position: relative;
+  z-index: 3;
+  padding: 56px 56px 92px; /* 底部预留波浪覆盖区 */
+  max-width: 760px;
+}
+.hero-slide .en-sub {
+  color: rgba(255, 255, 255, .75);
+  display: block;
+  margin-bottom: 12px;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 1.5px;
+  font-size: 13px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.55s cubic-bezier(0.25, 1, 0.5, 1) 0.15s, transform 0.55s cubic-bezier(0.25, 1, 0.5, 1) 0.15s;
+}
+.hero-slide h1 {
+  font-size: 38px;
+  line-height: 1.35;
+  margin: 0 0 14px;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.25s, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.25s;
+}
+.hero-slide .hero-quote {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, .92);
+  margin-top: 14px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.65s cubic-bezier(0.25, 1, 0.5, 1) 0.35s, transform 0.65s cubic-bezier(0.25, 1, 0.5, 1) 0.35s;
+}
+
+/* 激活时幻灯片文字优雅入场 */
+.hero-slide.is-active .en-sub,
+.hero-slide.is-active h1,
+.hero-slide.is-active .hero-quote {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 破框后文字回落到全站 1200px 内容区左缘（与导航/正文左缘对齐） */
+.is-front .hero-slide .hero-content {
   margin-left: calc(50vw - 600px + 24px);
 }
-/* 窄屏：视口小于 1248px(1200+2×24) 时，calc 结果为负，文字会顶到边缘；退回安全边距 */
 @media (max-width: 1248px) {
-  .is-front .hero-content { margin-left: 0; }
+  .is-front .hero-slide .hero-content { margin-left: 0; }
+}
+@media (max-width: 640px) {
+  .hero-slide h1 { font-size: 26px; }
+  .hero-slide .hero-quote { font-size: 15px; }
+  .hero-slide .hero-content { padding: 40px 24px 84px; }
+}
+
+/* 左右切换箭头（毛玻璃微质感） */
+.hero-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  opacity: 0;
+  pointer-events: none;
+}
+.hero-slider-wrap:hover .hero-nav-btn {
+  opacity: 0.85;
+  pointer-events: auto;
+}
+.hero-nav-btn:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translateY(-50%) scale(1.12);
+}
+.hero-nav-btn:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--brand, #ac706d);
+}
+.hero-nav-btn.prev {
+  left: 28px;
+}
+.hero-nav-btn.next {
+  right: 28px;
+}
+@media (max-width: 768px) {
+  .hero-nav-btn { display: none; }
+}
+
+/* 底部数字与进度条指示器 */
+.hero-pagination {
+  position: absolute;
+  right: 48px;
+  bottom: 86px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.is-front .hero-pagination {
+  right: calc(50vw - 600px + 48px);
+}
+@media (max-width: 1248px) {
+  .is-front .hero-pagination { right: 28px; }
+}
+@media (max-width: 640px) {
+  .hero-pagination {
+    bottom: 74px;
+    right: 20px;
+    gap: 8px;
+  }
+}
+.hero-dot {
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s ease;
+}
+.hero-dot:hover {
+  color: #fff;
+}
+.hero-dot-bar {
+  display: block;
+  width: 24px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+  position: relative;
+  transition: width 0.35s ease, background 0.3s;
+}
+.hero-dot.is-active .hero-dot-bar {
+  width: 42px;
+  background: rgba(255, 255, 255, 0.42);
+}
+.hero-dot-fill {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  background: #ffffff;
+  border-radius: 2px;
+}
+.hero-slider:not(.is-paused) .hero-dot.is-active .hero-dot-fill {
+  animation: heroBarProgress 5s linear forwards;
+}
+@keyframes heroBarProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+.hero-dot-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  margin-top: 5px;
+  opacity: 0.65;
+}
+.hero-dot.is-active .hero-dot-num {
+  color: #fff;
+  font-weight: 600;
+  opacity: 1;
 }
 
 /* 取景框直角（只画两条边，呈 L 形） */
 .hero-corners span {
   position: absolute;
   width: 20px; height: 20px;
-  z-index: 3;
+  z-index: 4;
   border-style: solid;
   border-color: rgba(255, 255, 255, .8);
   border-width: 0;
@@ -498,14 +696,6 @@ input, textarea, select, button {
 .hero-corners .c-tr { top: 18px; right: 18px; border-top-width: 2px; border-right-width: 2px; }
 .hero-corners .c-bl { bottom: 18px; left: 18px; border-bottom-width: 2px; border-left-width: 2px; }
 .hero-corners .c-br { bottom: 18px; right: 18px; border-bottom-width: 2px; border-right-width: 2px; }
-
-/* 取景框引文 */
-.hero-quote {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  color: rgba(255, 255, 255, .92);
-  margin-top: 14px;
-}
 
 /* 漂浮弹幕气泡 */
 .hero-bubbles { position: absolute; inset: 0; z-index: 2; pointer-events: none; }

@@ -8,13 +8,10 @@
 get_header();
 ?>
 
-<!-- Hero -->
+<!-- Hero Slider -->
 <section class="hero">
 	<div class="wrap">
-		<div class="hero-inner <?php echo get_theme_mod( 'hero_image' ) ? 'has-image' : ''; ?>"
-			<?php if ( get_theme_mod( 'hero_image' ) ) : ?>
-				style="background-image:url('<?php echo esc_url( get_theme_mod( 'hero_image' ) ); ?>')"
-			<?php endif; ?>>
+		<div class="hero-inner hero-slider-wrap">
 
 			<!-- 取景框直角 -->
 			<div class="hero-corners" aria-hidden="true">
@@ -46,13 +43,53 @@ get_header();
 				</div>
 			<?php endif; ?>
 
-			<div class="hero-content">
-				<span class="en-sub"><?php echo esc_html( get_theme_mod( 'hero_subtitle_en', 'PAPER · MINIMAL · POETRY' ) ); ?></span>
-				<h1><?php echo esc_html( get_theme_mod( 'hero_title', __( '把日子过成一本杂志', 'papervoyage' ) ) ); ?></h1>
-				<?php $quote = get_theme_mod( 'hero_quote' ); ?>
-				<?php if ( $quote ) : ?>
-					<p class="hero-quote">「<?php echo esc_html( $quote ); ?>」</p>
-				<?php endif; ?>
+			<!-- 轮播图幻灯片 -->
+			<div class="hero-slider" id="hero-slider" aria-roledescription="carousel" aria-label="<?php esc_attr_e( '首页画报轮播', 'papervoyage' ); ?>">
+				<div class="hero-slides">
+					<?php
+					$slides = papervoyage_get_hero_slides();
+					foreach ( $slides as $index => $slide ) :
+						$is_active = ( 0 === $index );
+						?>
+						<div class="hero-slide <?php echo $is_active ? 'is-active' : ''; ?>"
+							 data-index="<?php echo esc_attr( $index ); ?>"
+							 role="group"
+							 aria-roledescription="slide"
+							 aria-label="<?php echo esc_attr( sprintf( __( '第 %d 张，共 %d 张', 'papervoyage' ), $index + 1, count( $slides ) ) ); ?>"
+							 style="background-image:url('<?php echo esc_url( $slide['image'] ); ?>');">
+
+							<div class="hero-content">
+								<span class="en-sub"><?php echo esc_html( $slide['subtitle_en'] ); ?></span>
+								<h1><?php echo esc_html( $slide['title'] ); ?></h1>
+								<?php if ( ! empty( $slide['quote'] ) ) : ?>
+									<p class="hero-quote">「<?php echo esc_html( $slide['quote'] ); ?>」</p>
+								<?php endif; ?>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</div>
+
+				<!-- 左右切换箭头按钮 -->
+				<button type="button" class="hero-nav-btn prev" id="hero-prev" aria-label="<?php esc_attr_e( '上一张', 'papervoyage' ); ?>">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+				</button>
+				<button type="button" class="hero-nav-btn next" id="hero-next" aria-label="<?php esc_attr_e( '下一张', 'papervoyage' ); ?>">
+					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+				</button>
+
+				<!-- 底部指示进度条 -->
+				<div class="hero-pagination" id="hero-pagination" role="tablist">
+					<?php foreach ( $slides as $index => $slide ) : ?>
+						<button type="button" class="hero-dot <?php echo 0 === $index ? 'is-active' : ''; ?>"
+								data-index="<?php echo esc_attr( $index ); ?>"
+								role="tab"
+								aria-selected="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+								aria-label="<?php echo esc_attr( sprintf( __( '切换到第 %d 张', 'papervoyage' ), $index + 1 ) ); ?>">
+							<span class="hero-dot-bar"><span class="hero-dot-fill"></span></span>
+							<span class="hero-dot-num"><?php echo esc_html( sprintf( '%02d', $index + 1 ) ); ?></span>
+						</button>
+					<?php endforeach; ?>
+				</div>
 			</div>
 		</div>
 

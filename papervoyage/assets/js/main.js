@@ -95,6 +95,142 @@
 		$$('.reveal:not(.is-in)').forEach(function (el) { el.classList.add('is-in'); });
 	}, 1200);
 
+	/* ---------- 首页画报轮播图 (Hero Slider) ---------- */
+	function initHeroSlider() {
+		var slider = $('#hero-slider');
+		if (!slider) return;
+
+		var slides = $$('.hero-slide', slider);
+		var dots = $$('.hero-dot', slider);
+		var prevBtn = $('#hero-prev', slider);
+		var nextBtn = $('#hero-next', slider);
+		if (slides.length <= 1) return;
+
+		if (slider._pvSliderInit) return;
+		slider._pvSliderInit = true;
+
+		var currentIndex = 0;
+		var timer = null;
+		var interval = 5000;
+		var isPaused = false;
+
+		function showSlide(index) {
+			if (index < 0) index = slides.length - 1;
+			if (index >= slides.length) index = 0;
+			currentIndex = index;
+
+			slides.forEach(function (slide, i) {
+				var active = (i === currentIndex);
+				slide.classList.toggle('is-active', active);
+				slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+			});
+
+			dots.forEach(function (dot, i) {
+				var active = (i === currentIndex);
+				dot.classList.toggle('is-active', active);
+				dot.setAttribute('aria-selected', active ? 'true' : 'false');
+				var fill = $('.hero-dot-fill', dot);
+				if (fill) {
+					fill.style.animation = 'none';
+					void fill.offsetWidth;
+					if (active && !isPaused) {
+						fill.style.animation = '';
+					}
+				}
+			});
+
+			restartTimer();
+		}
+
+		function nextSlide() {
+			showSlide(currentIndex + 1);
+		}
+
+		function prevSlide() {
+			showSlide(currentIndex - 1);
+		}
+
+		function startTimer() {
+			stopTimer();
+			if (!isPaused) {
+				timer = setInterval(nextSlide, interval);
+			}
+		}
+
+		function stopTimer() {
+			if (timer) {
+				clearInterval(timer);
+				timer = null;
+			}
+		}
+
+		function restartTimer() {
+			startTimer();
+		}
+
+		function pause() {
+			isPaused = true;
+			slider.classList.add('is-paused');
+			stopTimer();
+		}
+
+		function resume() {
+			isPaused = false;
+			slider.classList.remove('is-paused');
+			startTimer();
+		}
+
+		if (prevBtn) {
+			prevBtn.addEventListener('click', function (e) {
+				e.preventDefault();
+				prevSlide();
+			});
+		}
+		if (nextBtn) {
+			nextBtn.addEventListener('click', function (e) {
+				e.preventDefault();
+				nextSlide();
+			});
+		}
+
+		dots.forEach(function (dot) {
+			dot.addEventListener('click', function (e) {
+				e.preventDefault();
+				var idx = parseInt(dot.getAttribute('data-index'), 10);
+				if (!isNaN(idx)) showSlide(idx);
+			});
+		});
+
+		slider.addEventListener('mouseenter', pause);
+		slider.addEventListener('mouseleave', resume);
+
+		var touchStartX = 0;
+		var touchStartY = 0;
+		slider.addEventListener('touchstart', function (e) {
+			touchStartX = e.touches[0].clientX;
+			touchStartY = e.touches[0].clientY;
+			pause();
+		}, { passive: true });
+
+		slider.addEventListener('touchend', function (e) {
+			var diffX = e.changedTouches[0].clientX - touchStartX;
+			var diffY = e.changedTouches[0].clientY - touchStartY;
+			if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+				if (diffX < 0) {
+					nextSlide();
+				} else {
+					prevSlide();
+				}
+			}
+			resume();
+		}, { passive: true });
+
+		startTimer();
+	}
+	initHeroSlider();
+	window.papervoyageInitSlider = initHeroSlider;
+
+
 	/* ---------- 回到顶部 / 悬浮工具条 ---------- */
 	var floatTools = $('#float-tools');
 	var backToTop = $('#back-to-top');

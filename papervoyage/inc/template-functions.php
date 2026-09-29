@@ -672,3 +672,48 @@ function papervoyage_front_body_class( $classes ) {
 	return $classes;
 }
 add_filter( 'body_class', 'papervoyage_front_body_class', 11 );
+
+/**
+ * 获取首页画报轮播图幻灯片数据
+ *
+ * @return array 轮播图列表
+ */
+function papervoyage_get_hero_slides() {
+	$custom_hero  = get_theme_mod( 'hero_image' );
+	$custom_title = get_theme_mod( 'hero_title', __( '把日子过成一本杂志', 'papervoyage' ) );
+	$custom_sub   = get_theme_mod( 'hero_subtitle_en', 'PAPER · MINIMAL · POETRY' );
+	$custom_quote = get_theme_mod( 'hero_quote', __( '做自己，不随波逐流，不妥协。这世间，本就是寒来暑往，日出日落，人聚又散。', 'papervoyage' ) );
+
+	$theme_uri  = get_template_directory_uri();
+	$first_img  = ! empty( $custom_hero ) ? $custom_hero : $theme_uri . '/assets/img/hero-default.jpg';
+
+	$slides = array(
+		array(
+			'image'       => $first_img,
+			'subtitle_en' => $custom_sub,
+			'title'       => $custom_title,
+			'quote'       => $custom_quote,
+		),
+		array(
+			'image'       => $theme_uri . '/assets/img/card-essay.jpg',
+			'subtitle_en' => 'READING · THINKING · ESSAY',
+			'title'       => __( '在慢下来的时光里阅读', 'papervoyage' ),
+			'quote'       => __( '书籍是随身携带的避难所，字里行间，藏着所有未曾抵达的远方与山海。', 'papervoyage' ),
+		),
+		array(
+			'image'       => $theme_uri . '/assets/img/card-film.jpg',
+			'subtitle_en' => 'FILM · MOMENT · MEMORY',
+			'title'       => __( '用胶片定格流动的微光', 'papervoyage' ),
+			'quote'       => __( '光影交织处，每一次快门都是对消逝时间最深情的挽留。', 'papervoyage' ),
+		),
+		array(
+			'image'       => $theme_uri . '/assets/img/card-snow.jpg',
+			'subtitle_en' => 'TRAVEL · TRANQUILITY · SILENCE',
+			'title'       => __( '万物静默如初的旅程', 'papervoyage' ),
+			'quote'       => __( '静水流深，当喧嚣退去，方能在素白天地间听见内心最真切的呼吸。', 'papervoyage' ),
+		),
+	);
+
+	return apply_filters( 'papervoyage_hero_slides', $slides );
+}
+
