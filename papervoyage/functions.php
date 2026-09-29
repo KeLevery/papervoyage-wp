@@ -222,6 +222,18 @@ function papervoyage_tag_cloud_args( $args ) {
 add_filter( 'widget_tag_cloud_args', 'papervoyage_tag_cloud_args' );
 
 /**
+ * 影视栏目按发布日期正序排列（从 09-01 开始依次往后）
+ */
+function papervoyage_films_archive_order( $query ) {
+	if ( ! is_admin() && $query->is_main_query() && $query->is_category( array( 'films', 'yingshi', 11 ) ) ) {
+		$query->set( 'orderby', 'date' );
+		$query->set( 'order', 'ASC' );
+	}
+}
+add_action( 'pre_get_posts', 'papervoyage_films_archive_order' );
+
+
+/**
  * 加载辅助模块
  */
 require PAPERVOYAGE_DIR . '/inc/template-functions.php';
