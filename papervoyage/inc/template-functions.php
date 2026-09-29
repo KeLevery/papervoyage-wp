@@ -707,10 +707,10 @@ function papervoyage_get_hero_slides() {
 			'quote'       => __( '光影交织处，每一次快门都是对消逝时间最深情的挽留。', 'papervoyage' ),
 		),
 		array(
-			'image'       => $theme_uri . '/assets/img/card-snow.jpg',
-			'subtitle_en' => 'TRAVEL · TRANQUILITY · SILENCE',
-			'title'       => __( '万物静默如初的旅程', 'papervoyage' ),
-			'quote'       => __( '静水流深，当喧嚣退去，方能在素白天地间听见内心最真切的呼吸。', 'papervoyage' ),
+			'image'       => $theme_uri . '/assets/img/card-coast.jpg',
+			'subtitle_en' => 'COAST · TWILIGHT · SOLITUDE',
+			'title'       => __( '向海风许一个平淡的愿望', 'papervoyage' ),
+			'quote'       => __( '潮汐去来，天地澄澈。远方的暮色与微风，总能抚平人间所有浮躁。', 'papervoyage' ),
 		),
 	);
 
