@@ -14,18 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) {
    ============================================================ */
 
 /**
- * 获取文章温度（浏览量）
+ * 获取文章温度（浏览量，完全真实数据统计，点一次加一次）
  */
 function papervoyage_get_views( $post_id = null ) {
 	$post_id = $post_id ? $post_id : get_the_ID();
-	$views   = (int) get_post_meta( $post_id, '_papervoyage_views', true );
-	// 保底温度：让旧文章也有"余温"
-	$base = (int) get_post_meta( $post_id, '_papervoyage_views_base', true );
-	if ( ! $base ) {
-		$base = 40 + ( $post_id % 120 );
-		update_post_meta( $post_id, '_papervoyage_views_base', $base );
-	}
-	return $base + $views;
+	return (int) get_post_meta( $post_id, '_papervoyage_views', true );
 }
 
 /**
