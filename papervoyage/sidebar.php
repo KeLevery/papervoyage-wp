@@ -7,6 +7,14 @@
 ?>
 <aside class="sidebar" aria-label="<?php esc_attr_e( '侧栏', 'papervoyage' ); ?>">
 
+	<?php if ( is_category( array( 'films', 'yingshi' ) ) ) : ?>
+		<!-- 影视栏目专属引文小部件 -->
+		<section class="widget widget-film-quote">
+			<p class="film-quote-text">一個人喜歡電影，一直以為《英雄》電影中的英雄是無名，根本就不知道張藝謀眼中的英雄居然是秦王，這就是根本不入流的原因。</p>
+			<span class="film-quote-author">—— 影視</span>
+		</section>
+	<?php endif; ?>
+
 	<!-- 内置：温度热榜 -->
 	<section class="widget">
 		<h3 class="widget-title"><?php esc_html_e( '温度榜', 'papervoyage' ); ?><span class="en-sub" style="margin-left:8px"><?php esc_html_e( 'Hottest', 'papervoyage' ); ?></span></h3>

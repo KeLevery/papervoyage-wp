@@ -477,6 +477,25 @@ function papervoyage_category_hero( $slug, $cn, $en, $desc = '' ) {
 }
 
 /**
+ * 获取电影封面图（优先特色图片，其次检测 assets/img/films/{post_name}.jpg，再其次默认 card-film.jpg）
+ */
+function papervoyage_get_film_thumbnail( $post_id = null, $slug = '' ) {
+	$post_id = $post_id ? $post_id : get_the_ID();
+	if ( has_post_thumbnail( $post_id ) ) {
+		return get_the_post_thumbnail_url( $post_id, 'large' );
+	}
+	if ( empty( $slug ) ) {
+		$slug = get_post_field( 'post_name', $post_id );
+	}
+	$theme_dir = get_template_directory();
+	$theme_uri = get_template_directory_uri();
+	if ( ! empty( $slug ) && file_exists( $theme_dir . '/assets/img/films/' . $slug . '.jpg' ) ) {
+		return $theme_uri . '/assets/img/films/' . $slug . '.jpg';
+	}
+	return $theme_uri . '/assets/img/card-film.jpg';
+}
+
+/**
  * 栏目文章卡——按 slug 输出完全不同的卡片模板
  */
 function papervoyage_category_card( $slug ) {
@@ -500,9 +519,9 @@ function papervoyage_category_card( $slug ) {
 	);
 	$target_slug = $alias[ $slug ] ?? $slug;
 
-	// 后台开启「统一分类卡片为随笔/日志卡片样式」时，输出日志卡片样式
+	// 后台开启「统一分类卡片为随笔/日志卡片样式」时，输出日志卡片样式（影视栏目除外，始终保持专属美学撕纸画报卡）
 	$force_log_card = get_theme_mod( 'unify_category_cards', true );
-	if ( $force_log_card ) {
+	if ( $force_log_card && 'films' !== $target_slug ) {
 		?>
 		<article class="log-card">
 			<a class="log-date" href="<?php echo esc_url( $link ); ?>">
@@ -558,21 +577,46 @@ function papervoyage_category_card( $slug ) {
 			<?php
 			break;
 		case 'films':
+			$film_thumb     = papervoyage_get_film_thumbnail( get_the_ID() );
+			$fav_count      = 2 + ( get_the_ID() % 4 );
+			$read_min       = preg_replace( '/[^\d]/', '', $read );
+			$read_min       = $read_min ? $read_min : '2';
+			$comments_count = get_comments_number();
 			?>
-			<article class="screening">
-				<?php if ( $thumb ) : ?>
-					<a class="scr-thumb" href="<?php echo esc_url( $link ); ?>">
-						<img src="<?php echo esc_url( $thumb ); ?>" alt="<?php echo esc_attr( $title ); ?>">
+			<article class="film-card">
+				<div class="film-thumb-wrap">
+					<a class="film-thumb" href="<?php echo esc_url( $link ); ?>" title="<?php echo esc_attr( $title ); ?>">
+						<img src="<?php echo esc_url( $film_thumb ); ?>" alt="<?php echo esc_attr( $title ); ?>" loading="lazy">
+						<span class="film-fav" aria-label="<?php esc_attr_e( '收藏数', 'papervoyage' ); ?>">
+							<span class="fav-count"><?php echo esc_html( $fav_count ); ?></span>
+							<svg class="fav-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+						</span>
 					</a>
-				<?php endif; ?>
-				<div class="scr-body">
-					<h3><a href="<?php echo esc_url( $link ); ?>" style="color:inherit"><?php echo esc_html( $title ); ?></a></h3>
-					<p><?php echo esc_html( $excerpt ); ?></p>
-					<div class="scr-meta">
-						<span class="runtime"><?php echo esc_html( $read ); ?> MIN</span>
-						<span><?php echo esc_html( get_the_date( 'Y-m-d' ) ); ?></span>
-						<span><?php echo esc_html( $temp ); ?> °C</span>
+				</div>
+				<div class="film-body">
+					<div class="film-title-row">
+						<h3 class="film-title"><a href="<?php echo esc_url( $link ); ?>" title="<?php echo esc_attr( $title ); ?>"><?php echo esc_html( $title ); ?></a></h3>
+						<span class="film-temp"><?php echo esc_html( $temp ); ?> °C</span>
 					</div>
+					<div class="film-meta">
+						<span class="meta-item" title="<?php esc_attr_e( '阅读时长', 'papervoyage' ); ?>">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+							<?php echo esc_html( $read_min ); ?> mins
+						</span>
+						<span class="meta-item" title="<?php esc_attr_e( '字数', 'papervoyage' ); ?>">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+							<?php echo esc_html( $words ); ?>
+						</span>
+						<span class="meta-item" title="<?php esc_attr_e( '发布日期', 'papervoyage' ); ?>">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+							<?php echo esc_html( get_the_date( 'Y-m-d' ) ); ?>
+						</span>
+						<span class="meta-item" title="<?php esc_attr_e( '评论', 'papervoyage' ); ?>">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+							<?php echo (int) $comments_count; ?>
+						</span>
+					</div>
+					<p class="film-excerpt"><?php echo esc_html( $excerpt ); ?></p>
 				</div>
 			</article>
 			<?php

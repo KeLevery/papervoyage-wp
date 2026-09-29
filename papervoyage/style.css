@@ -4,7 +4,7 @@ Theme URI: https://example.com/papervoyage
 Author: kele
 Author URI: https://example.com
 Description: 纸面极简 × 手作温度 × 数字诗意 的个人出版型博客主题。灵感源自孤斗 GUDOU × D.DESIGN 设计系统：纸灰底色、豆沙红单点强调、中英双层排版、「温度 °C」热度隐喻、波浪分隔与取景框引文。支持自定义菜单、特色图片、小工具、明暗双主题。
-Version: 1.5.1
+Version: 1.5.2
 Requires at least: 5.8
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -1630,44 +1630,293 @@ input, textarea, select, button {
 .cat-travels .postcard p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:10px}
 .cat-travels .postcard .pc-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
 
-/* === 影視 · 暗厅与胶片 === */
-.cat-films{--bg-page:#0e1011}
-.cat-films .site-header{background:rgba(14,16,17,.9);border-bottom-color:#2a2a2a}
-.cat-films .topbar{background:#000}
-.cat-films main{background:#0e1011;color:#c0c0c0}
-.cat-films .page-head{border-bottom-color:#2a2a2a}
-.cat-films .page-head h1{color:#f0f0f0}
-.cat-films .page-head .desc{color:#777}
-.cat-films .page-head .en-sub{color:#666}
-.cat-films .cat-hero{
-  background:#000;border-radius:var(--r-hero);overflow:hidden;position:relative;min-height:360px;display:flex;align-items:center;
-  background-size:cover;background-position:center;
+/* === 影視 · 撕纸毛边与电影画报 === */
+.cat-films .cat-hero {
+  border-radius: var(--r-hero);
+  overflow: hidden;
+  position: relative;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--line);
 }
-.cat-films .cat-hero::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.4)}
-.cat-films .cat-hero::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(255,200,100,.08),transparent 60%)}
-.cat-films .cat-hero-inner{position:relative;z-index:2;padding:60px;color:#e0d8c8}
-.cat-films .cat-hero-inner .en-sub{color:#8a7a5a;display:block;margin-bottom:14px}
-.cat-films .cat-hero-inner h1{font-size:42px;color:#f5e6c8;letter-spacing:.04em}
-.cat-films .cat-hero-inner p{font-family:var(--font-serif);font-size:15px;color:rgba(210,195,165,.6);margin-top:14px}
-/* 胶片孔装饰 */
-.cat-films .filmstrip{height:24px;background:repeating-linear-gradient(90deg,#000 0 30px,transparent 30px 36px);border-top:2px solid #1a1a1a;border-bottom:2px solid #1a1a1a;margin:0 0 32px}
-/* 影視文章卡：宽银幕 letterbox */
-.cat-films .screening{background:#181a1c;border:1px solid #2a2a2a;border-radius:var(--r-lg);overflow:hidden;margin-bottom:24px;transition:border-color var(--t-base)}
-.cat-films .screening:hover{border-color:#8a7a5a}
-.cat-films .screening .scr-thumb{aspect-ratio:21/9;overflow:hidden;position:relative}
-.cat-films .screening .scr-thumb img{width:100%;height:100%;object-fit:cover;opacity:.8}
-.cat-films .screening .scr-thumb::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 80px rgba(0,0,0,.6)}
-.cat-films .screening .scr-body{padding:20px 24px}
-.cat-films .screening h3{font-size:18px;color:#e8e0d0;margin-bottom:8px}
-.cat-films .screening p{font-size:13px;color:#888;line-height:1.7;margin-bottom:10px}
-.cat-films .screening .scr-meta{display:flex;gap:18px;font-family:var(--font-mono);font-size:11px;color:#666}
-.cat-films .screening .scr-meta .runtime{color:#c8a050}
-.cat-films .sidebar .widget{background:#181a1c;border-color:#2a2a2a}
-.cat-films .sidebar .widget-title{color:#e0d8c8}
-.cat-films .sidebar .widget ul li{border-bottom-color:#222}
-.cat-films .sidebar .widget a{color:#999}
-.cat-films .sidebar .widget a:hover{color:#c8a050}
-.cat-films .site-footer{border-top-color:#2a2a2a;color:#666}
+.cat-films .cat-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(20, 24, 28, 0.72) 0%, rgba(30, 24, 20, 0.5) 100%);
+}
+.cat-films .cat-hero-inner {
+  position: relative;
+  z-index: 2;
+  padding: 40px 48px;
+  color: #fff;
+}
+.cat-films .cat-hero-inner .en-sub {
+  color: rgba(255, 255, 255, 0.75);
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+.cat-films .cat-hero-inner h1 {
+  font-size: 34px;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+.cat-films .cat-hero-inner p {
+  font-family: var(--font-serif);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 10px;
+  max-width: 600px;
+}
+.cat-films .filmstrip {
+  display: none;
+}
+
+/* 影视页面版心自适应宽度 */
+.cat-films .wrap {
+  max-width: 1260px;
+}
+
+.content-with-sidebar.film-layout {
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 36px;
+}
+
+/* 三列电影网格流 */
+.film-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 36px;
+}
+
+/* 影视电影卡：撕纸毛边与画报风 */
+.film-card {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  padding: 12px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.film-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--line);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.film-thumb-wrap {
+  position: relative;
+  width: 100%;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.film-thumb {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #1a1a1a;
+  -webkit-mask-image: url('assets/img/torn-mask.svg');
+  mask-image: url('assets/img/torn-mask.svg');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.film-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.film-card:hover .film-thumb img {
+  transform: scale(1.05);
+}
+
+/* 浮动收藏红心 */
+.film-fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 12px;
+  line-height: 1.2;
+  pointer-events: none;
+  font-family: var(--font-mono);
+}
+
+.film-fav .fav-icon {
+  stroke: #ff4777;
+  fill: #ff4777;
+}
+
+/* 卡片正文 */
+.film-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.film-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.film-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.film-title a {
+  color: var(--ink);
+  text-decoration: none;
+  transition: color var(--t-base);
+}
+
+.film-title a:hover {
+  color: var(--brand);
+}
+
+/* 粉红/珊瑚红温度胶囊 */
+.film-temp {
+  flex-shrink: 0;
+  background: #d66a6a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.3;
+  font-family: var(--font-mono);
+}
+
+/* 电影元数据图标列 */
+.film-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+}
+
+.film-meta .meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.film-meta .meta-item svg {
+  stroke: currentColor;
+  opacity: 0.65;
+}
+
+/* 电影摘要三行截断 */
+.film-excerpt {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-light);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 影视栏目侧栏专属引言 */
+.widget-film-quote {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 22px 20px;
+  margin-bottom: 24px;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.widget-film-quote::before {
+  content: "“";
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  font-size: 38px;
+  line-height: 1;
+  font-family: Georgia, serif;
+  color: var(--line);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.widget-film-quote .film-quote-text {
+  font-size: 13.5px;
+  line-height: 1.85;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  margin: 0 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.widget-film-quote .film-quote-author {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--font-serif);
+}
+
+@media (max-width: 1100px) {
+  .film-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .film-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* === 雜文 · 纸面与墨迹 === */
 .cat-essays .cat-hero{

@@ -38,12 +38,15 @@ if ( ! $desc ) {
 
 		<div style="height:40px"></div>
 
-		<div class="content-with-sidebar">
-			<div id="list-flow">
+		<?php $is_film = ( 'films' === $slug || 'yingshi' === $slug ); ?>
+		<div class="content-with-sidebar <?php echo $is_film ? 'film-layout' : ''; ?>">
+			<div id="list-flow" class="<?php echo $is_film ? 'film-flow' : ''; ?>">
 				<?php if ( have_posts() ) : ?>
+					<div class="<?php echo $is_film ? 'film-grid' : ''; ?>">
 					<?php while ( have_posts() ) : the_post(); ?>
 						<?php papervoyage_category_card( $slug ); ?>
 					<?php endwhile; ?>
+					</div>
 
 					<div class="pagination">
 						<?php
